@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="CORS">
+<title>CORS</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  <ulink url="https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS">CORS</ulink>
+  is a mechanisim to allow code running in a browser (Javascript for
+  example) make requests to a domain other then the one from where it
+  originated.
+</para>
+<para>
+  Swift supports CORS requests to containers and objects.
+</para>
+<para>
+  CORS metadata is held on the container only. The values given apply to
+  the container itself and all objects within it.
+</para>
+<para>
+  The supported headers are,
+</para>
+<informaltable>
+  <tgroup cols="2">
+    <colspec colwidth="61*" align="left" />
+    <colspec colwidth="38*" align="left" />
+    <thead>
+      <row>
+        <entry>
+          Metadata
+        </entry>
+        <entry>
+          Use
+        </entry>
+      </row>
+    </thead>
+    <tbody>
+      <row>
+        <entry>
+          X-Container-Meta-Access-Control-Allow-Origin
+        </entry>
+        <entry>
+          Origins to be allowed to make Cross Origin Requests, space
+          separated.
+        </entry>
+      </row>
+      <row>
+        <entry>
+          X-Container-Meta-Access-Control-Max-Age
+        </entry>
+        <entry>
+          Max age for the Origin to hold the preflight results.
+        </entry>
+      </row>
+      <row>
+        <entry>
+          X-Container-Meta-Access-Control-Expose-Headers
+        </entry>
+        <entry>
+          Headers exposed to the user agent (e.g. browser) in the the
+          actual request response. Space separated.
+        </entry>
+      </row>
+    </tbody>
+  </tgroup>
+</informaltable>
+<para>
+  Before a browser issues an actual request it may issue a
+  <ulink url="https://developer.mozilla.org/en-US/docs/HTTP/Access_control_CORS#Preflighted_requests">preflight
+  request</ulink>. The preflight request is an OPTIONS call to verify
+  the Origin is allowed to make the request. The sequence of events are,
+</para>
+<itemizedlist>
+  <listitem>
+    <para>
+      Browser makes OPTIONS request to Swift
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Swift returns 200/401 to browser based on allowed origins
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      If 200, browser makes the &quot;actual request&quot; to Swift,
+      i.e. PUT, POST, DELETE, HEAD, GET
+    </para>
+  </listitem>
+</itemizedlist>
+<para>
+  When a browser receives a response to an actual request it only
+  exposes those headers listed in the
+  <literal>Access-Control-Expose-Headers</literal> header. By default
+  Swift returns the following values for this header,
+</para>
+<itemizedlist>
+  <listitem>
+    <para>
+      &quot;simple response headers&quot; as listed on
+      <ulink url="http://www.w3.org/TR/cors/#simple-response-header">http://www.w3.org/TR/cors/#simple-response-header</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      the headers <literal>etag</literal>,
+      <literal>x-timestamp</literal>, <literal>x-trans-id</literal>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      all metadata headers (<literal>X-Container-Meta-*</literal> for
+      containers and <literal>X-Object-Meta-*</literal> for objects)
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      headers listed in
+      <literal>X-Container-Meta-Access-Control-Expose-Headers</literal>
+    </para>
+  </listitem>
+</itemizedlist>
+</section>
+<section xml:id="sample-javascript">
+  <title>Sample Javascript</title>
+  <para>
+    To see some CORS Javascript in action download the test CORS page_
+    (source below). Host it on a webserver and take note of the protocol
+    and hostname (origin) you'll be using to request the page, e.g.
+    <link xlink:href="http://localhost">http://localhost</link>.
+  </para>
+  <para>
+    Locate a container you'd like to query. Needless to say the Swift
+    cluster hosting this container should have CORS support. Append the
+    origin of the test page to the container's
+    <literal>X-Container-Meta-Access-Control-Allow-Origin</literal>
+    header,:
+  </para>
+  <programlisting>
+curl -X POST -H 'X-Auth-Token: xxx' \
+  -H 'X-Container-Meta-Access-Control-Allow-Origin: http://localhost' \
+  http://192.168.56.3:8080/v1/AUTH_test/cont1
+</programlisting>
+  <para>
+    At this point the container is now accessible to CORS clients hosted
+    on <link xlink:href="http://localhost">http://localhost</link>. Open the
+    test CORS page in your browser.
+  </para>
+  <orderedlist>
+    <listitem>
+      <para>
+        Populate the Token field
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Populate the URL field with the URL of either a container or
+        object
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Select the request method
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Hit Submit
+      </para>
+    </listitem>
+  </orderedlist>
+  <para>
+    Assuming the request succeeds you should see the response header and
+    body. If something went wrong the response status will be 0.
+  </para>
+<section xml:id="test-cors-page">
+    <title>Test CORS Page</title>
+    <programlisting>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;title&gt;Test CORS&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+
+    Token&lt;br&gt;&lt;input id=&quot;token&quot; type=&quot;text&quot; size=&quot;64&quot;&gt;&lt;br&gt;&lt;br&gt;
+
+    Method&lt;br&gt;
+    &lt;select id=&quot;method&quot;&gt;
+        &lt;option value=&quot;GET&quot;&gt;GET&lt;/option&gt;
+        &lt;option value=&quot;HEAD&quot;&gt;HEAD&lt;/option&gt;
+        &lt;option value=&quot;POST&quot;&gt;POST&lt;/option&gt;
+        &lt;option value=&quot;DELETE&quot;&gt;DELETE&lt;/option&gt;
+        &lt;option value=&quot;PUT&quot;&gt;PUT&lt;/option&gt;
+    &lt;/select&gt;&lt;br&gt;&lt;br&gt;
+
+    URL (Container or Object)&lt;br&gt;&lt;input id=&quot;url&quot; size=&quot;64&quot; type=&quot;text&quot;&gt;&lt;br&gt;&lt;br&gt;
+
+    &lt;input id=&quot;submit&quot; type=&quot;button&quot; value=&quot;Submit&quot; onclick=&quot;submit(); return false;&quot;&gt;
+
+    &lt;pre id=&quot;response_headers&quot;&gt;&lt;/pre&gt;
+    &lt;p&gt;
+    &lt;hr&gt;
+    &lt;pre id=&quot;response_body&quot;&gt;&lt;/pre&gt;
+
+    &lt;script type=&quot;text/javascript&quot;&gt;
+      function submit() {
+          var token = document.getElementById('token').value;
+          var method = document.getElementById('method').value;
+          var url = document.getElementById('url').value;
+
+          document.getElementById('response_headers').textContent = null;
+          document.getElementById('response_body').textContent = null;
+
+          var request = new XMLHttpRequest();
+
+          request.onreadystatechange = function (oEvent) {
+              if (request.readyState == 4) {
+                  responseHeaders = 'Status: ' + request.status;
+                  responseHeaders = responseHeaders + '\nStatus Text: ' + request.statusText;
+                  responseHeaders = responseHeaders + '\n\n' + request.getAllResponseHeaders();
+                  document.getElementById('response_headers').textContent = responseHeaders;
+                  document.getElementById('response_body').textContent = request.responseText;
+              }
+          }
+
+          request.open(method, url);
+          request.setRequestHeader('X-Auth-Token', token);
+          request.send(null);
+      }
+    &lt;/script&gt;
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</programlisting>
+</section>
+</section>
+</section>

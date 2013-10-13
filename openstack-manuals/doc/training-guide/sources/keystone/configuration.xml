@@ -1,0 +1,2403 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Configuring-Keystone">
+<title>Configuring Keystone</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Once Keystone is installed, it is configured via a primary
+  configuration file (<literal>etc/keystone.conf</literal>), a
+  PasteDeploy configuration file
+  (<literal>etc/keystone-paste.ini</literal>), possibly a separate
+  logging configuration file, and initializing data into Keystone using
+  the command line client.
+</para>
+</section>
+<section xml:id="starting-and-stopping-keystone">
+  <title>Starting and Stopping Keystone</title>
+  <para>
+    Start Keystone services using the command:
+  </para>
+  <programlisting>
+$ keystone-all
+</programlisting>
+  <para>
+    Invoking this command starts up two <literal>wsgi.Server</literal>
+    instances, <literal>admin</literal> (the administration API) and
+    <literal>main</literal> (the primary/public API interface). Both
+    services are configured to run in a single process.
+  </para>
+  <para>
+    Stop the process using <literal>Control-C</literal>.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      If you have not already configured Keystone, it may not start as
+      expected.
+    </para>
+  </blockquote>
+</section>
+<section xml:id="configuration-files">
+  <title>Configuration Files</title>
+  <para>
+    The Keystone configuration files are an <literal>ini</literal> file
+    format based on <link xlink:href="http://pythonpaste.org/">Paste</link>,
+    a common system used to configure Python WSGI based applications.
+    The PasteDeploy configuration entries (WSGI pipeline definitions)
+    can be provided in a separate <literal>keystone-paste.ini</literal>
+    file, while general and driver-specific configuration parameters are
+    in the primary configuration file <literal>keystone.conf</literal>.
+    The primary configuration file is organized into the following
+    sections:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>[DEFAULT]</literal> - general configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[sql]</literal> - optional storage backend
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[ec2]</literal> - Amazon EC2 authentication driver
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[s3]</literal> - Amazon S3 authentication driver
+        configuration.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[oauth1]</literal> - Oauth 1.0a system driver
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[identity]</literal> - identity system driver
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[catalog]</literal> - service catalog driver
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[token]</literal> - token driver &amp; token provider
+        configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[cache]</literal> - caching layer configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[policy]</literal> - policy system driver configuration
+        for RBAC
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[signing]</literal> - cryptographic signatures for PKI
+        based tokens
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[ssl]</literal> - SSL configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[auth]</literal> - Authentication plugin configuration
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[os_inherit]</literal> - Inherited Role Assignment
+        extension
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>[paste_deploy]</literal> - Pointer to the PasteDeploy
+        configuration file
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    The Keystone primary configuration file is expected to be named
+    <literal>keystone.conf</literal>. When starting Keystone, you can
+    specify a different configuration file to use with
+    <literal>--config-file</literal>. If you do
+    <emphasis role="strong">not</emphasis> specify a configuration file,
+    Keystone will look in the following directories for a configuration
+    file, in order:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>~/.keystone/</literal>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>~/</literal>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>/etc/keystone/</literal>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>/etc/</literal>
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    PasteDeploy configuration file is specified by the
+    <literal>config_file</literal> parameter in
+    <literal>[paste_deploy]</literal> section of the primary
+    configuration file. If the parameter is not an absolute path, then
+    Keystone looks for it in the same directories as above. If not
+    specified, WSGI pipeline definitions are loaded from the primary
+    configuration file.
+  </para>
+<section xml:id="domain-specific-drivers">
+    <title>Domain-specific Drivers</title>
+    <blockquote>
+      <para>
+        <emphasis role="strong">warning</emphasis>
+      </para>
+      <para>
+        This feature is experimental and unsupported in Havana (with
+        several known issues that will not be fixed). Feedback welcome
+        for Icehouse!
+      </para>
+    </blockquote>
+    <para>
+      Keystone supports the option (disabled by default) to specify
+      identity driver configurations on a domain by domain basis,
+      allowing, for example, a specific domain to have its own LDAP or
+      SQL server. This is configured by specifying the following
+      options:
+    </para>
+    <programlisting>
+[identity]
+domain_specific_drivers_enabled = True
+domain_config_dir = /etc/keystone/domains
+</programlisting>
+    <para>
+      Setting <literal>domain_specific_drivers_enabled</literal> to
+      <literal>True</literal> will enable this feature, causing Keystone
+      to look in the <literal>domain_config_dir</literal> for config
+      files of the form:
+    </para>
+    <programlisting>
+keystone.&lt;domain_name&gt;.conf
+</programlisting>
+    <para>
+      Options given in the domain specific configuration file will
+      override those in the primary configuration file for the specified
+      domain only. Domains without a specific configuration file will
+      continue to use the options from the primary configuration file.
+    </para>
+</section>
+<section xml:id="authentication-plugins">
+    <title>Authentication Plugins</title>
+    <para>
+      Keystone supports authentication plugins and they are specified in
+      the <literal>[auth]</literal> section of the configuration file.
+      However, an authentication plugin may also have its own section in
+      the configuration file. It is up to the plugin to register its own
+      configuration options.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>methods</literal> - comma-delimited list of
+          authentication plugin names
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>&lt;plugin name&gt;</literal> - specify the class
+          which handles to authentication method, in the same manner as
+          one would specify a backend driver.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Keystone provides three authentication methods by default.
+      <literal>password</literal> handles password authentication and
+      <literal>token</literal> handles token authentication.
+      <literal>external</literal> is used in conjunction with
+      authentication performed by a container web server that sets the
+      <literal>REMOTE_USER</literal> environment variable.
+    </para>
+<section xml:id="how-to-implement-an-authentication-plugin">
+      <title>How to Implement an Authentication Plugin</title>
+      <para>
+        All authentication plugins must extend the
+        <literal>keystone.auth.core.AuthMethodHandler</literal> class
+        and implement the <literal>authenticate()</literal> method. The
+        <literal>authenticate()</literal> method expects the following
+        parameters.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>context</literal> - Keystone's request context
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>auth_payload</literal> - the content of the
+            authentication for a given method
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>auth_context</literal> - user authentication
+            context, a dictionary shared by all plugins. It contains
+            <literal>method_names</literal> and
+            <literal>extras</literal> by default.
+            <literal>method_names</literal> is a list and
+            <literal>extras</literal> is a dictionary.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        If successful, the <literal>authenticate()</literal> method must
+        provide a valid <literal>user_id</literal> in
+        <literal>auth_context</literal> and return
+        <literal>None</literal>. <literal>method_name</literal> is used
+        to convey any additional authentication methods in case
+        authentication is for re-scoping. For example, if the
+        authentication is for re-scoping, a plugin must append the
+        previous method names into <literal>method_names</literal>.
+        Also, a plugin may add any additional information into
+        <literal>extras</literal>. Anything in <literal>extras</literal>
+        will be conveyed in the token's <literal>extras</literal> field.
+      </para>
+      <para>
+        If authentication requires multiple steps, the
+        <literal>authenticate()</literal> method must return the payload
+        in the form of a dictionary for the next authentication step.
+      </para>
+      <para>
+        If authentication is unsuccessful, the
+        <literal>authenticate()</literal> method must raise a
+        <literal>keystone.exception.Unauthorized</literal> exception.
+      </para>
+      <para>
+        Simply add the new plugin name to the <literal>methods</literal>
+        list along with your plugin class configuration in the
+        <literal>[auth]</literal> sections of the configuration file to
+        deploy it.
+      </para>
+      <para>
+        If the plugin require addition configurations, it may register
+        its own section in the configuration file.
+      </para>
+      <para>
+        Plugins are invoked in the order in which they are specified in
+        the <literal>methods</literal> attribute of the
+        <literal>authentication</literal> request body. If multiple
+        plugins are invoked, all plugins must succeed in order to for
+        the entire authentication to be successful. Furthermore, all the
+        plugins invoked must agree on the <literal>user_id</literal> in
+        the <literal>auth_context</literal>.
+      </para>
+      <para>
+        The <literal>REMOTE_USER</literal> environment variable is only
+        set from a containing webserver. However, to ensure that a user
+        must go through other authentication mechanisms, even if this
+        variable is set, remove <literal>external</literal> from the
+        list of plugins specified in <literal>methods</literal>. This
+        effectively disables external authentication.
+      </para>
+</section>
+</section>
+<section xml:ider">
+    <title>Token Provider</title>
+    <para>
+      Keystone supports customizable token provider and it is specified
+      in the <literal>[token]</literal> section of the configuration
+      file. Keystone provides both UUID and PKI token providers, with
+      PKI token provider enabled as default. However, users may register
+      their own token provider by configuring the following property.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>provider</literal> - token provider driver. Defaults
+          to <literal>keystone.token.providers.pki.Provider</literal>
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Note that <literal>token_format</literal> in the
+      <literal>[signing]</literal> section is deprecated but still being
+      supported for backward compatibility. Therefore, if
+      <literal>provider</literal> is set to
+      <literal>keystone.token.providers.pki.Provider</literal>,
+      <literal>token_format</literal> must be <literal>PKI</literal>.
+      Conversely, if <literal>provider</literal> is
+      <literal>keystone.token.providers.uuid.Provider</literal>,
+      <literal>token_format</literal> must be <literal>UUID</literal>.
+    </para>
+    <para>
+      For a customized provider, <literal>token_format</literal> must
+      not set to <literal>PKI</literal> or <literal>UUID</literal>.
+    </para>
+</section>
+<section xml:id="caching-layer">
+    <title>Caching Layer</title>
+    <para>
+      Keystone supports a caching layer that is above the configurable
+      subsystems (e.g <literal>token</literal>,
+      <literal>identity</literal>, etc). Keystone uses the
+      <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/">dogpile.cache</link>
+      library which allows for flexible cache backends. The majority of
+      the caching configuration options are set in the
+      <literal>[cache]</literal> section. However, each section that has
+      the capability to be cached usually has a
+      <literal>caching</literal> boolean value that will toggle caching
+      for that specific section. The current default behavior is that
+      subsystem caching is enabled, but the global toggle is set to
+      disabled.
+    </para>
+<section xml:id="cache-configuration-section">
+      <title><literal>[cache]</literal> configuration section:</title>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>enabled</literal> - enables/disables caching across
+            all of keystone
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>debug_cache_backend</literal> - enables more
+            in-depth logging from the cache backend (get, set, delete,
+            etc)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>backend</literal> - the caching backend module to
+            use e.g. <literal>dogpile.cache.memcache</literal>
+          </para>
+          <blockquote>
+            <blockquote>
+              <para>
+                <emphasis role="strong">note</emphasis>
+              </para>
+              <variablelist>
+                <varlistentry>
+                  <term>
+                    A given <literal>backend</literal> must be
+                    registered with <literal>dogpile.cache</literal>
+                    before it
+                  </term>
+                  <listitem>
+                    <para>
+                      can be used. The default backend is the
+                      <literal>Keystone</literal> no-op backend
+                      (<literal>keystone.common.cache.noop</literal>).
+                      If caching is desired a different backend will
+                      need to be specified. Current functional backends
+                      are:
+                    </para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </blockquote>
+            <itemizedlist>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.memcached</literal> - Memcached
+                  backend using the standard
+                  <link xlink:href="http://www.tummy.com/software/python-memcached/">python-memcached</link>
+                  library
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.pylibmc</literal> - Memcached
+                  backend using the
+                  <link xlink:href="http://sendapatch.se/projects/pylibmc/index.html">pylibmc</link>
+                  library
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.bmemcached</literal> -
+                  Memcached using
+                  <link xlink:href="https://github.com/jaysonsantos/python-binary-memcached">python-binary-memcached</link>
+                  library.
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.redis</literal> -
+                  <link xlink:href="http://redis.io/">Redis</link> backend
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.dbm</literal> - local DBM file
+                  backend
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <literal>dogpile.cache.memory</literal> - in-memory
+                  cache
+                </para>
+                <blockquote>
+                  <blockquote>
+                    <para>
+                      <emphasis role="strong">warning</emphasis>
+                    </para>
+                    <variablelist>
+                      <varlistentry>
+                        <term>
+                          <literal>dogpile.cache.memory</literal> is not
+                          suitable for use outside of unit testing
+                        </term>
+                        <listitem>
+                          <para>
+                            as it does not cleanup it's internal cache
+                            on cache expiration, does not provide
+                            isolation to the cached data (values in the
+                            store can be inadvertently changed without
+                            extra layers of data protection added), and
+                            does not share cache between processes. This
+                            means that caching and cache invalidation
+                            will not be consistent or reliable when
+                            using <literal>Keystone</literal> and the
+                            <literal>dogpile.cache.memory</literal>
+                            backend under any real workload.
+                          </para>
+                        </listitem>
+                      </varlistentry>
+                    </variablelist>
+                  </blockquote>
+                </blockquote>
+              </listitem>
+            </itemizedlist>
+          </blockquote>
+        </listitem>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>
+                <literal>expiration_time</literal> - int, the default
+                length of time to cache a specific value. A value of
+                <literal>0</literal>
+              </term>
+              <listitem>
+                <para>
+                  indicates to not cache anything. It is recommended
+                  that the <literal>enabled</literal> option be used to
+                  disable cache instead of setting this to
+                  <literal>0</literal>.
+                </para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>
+                <literal>backend_argument</literal> - an argument passed
+                to the backend when instantiated
+              </term>
+              <listitem>
+                <para>
+                  <literal>backend_argument</literal> should be
+                  specified once per argument to be passed to the back
+                  end and in the format of
+                  <literal>&lt;argument name&gt;:&lt;argument value&gt;</literal>.
+                  e.g.:
+                  <literal>backend_argument = host:localhost</literal>
+                </para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>proxies</literal> - comma delimited list of
+            <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/api.html#proxy-backends">ProxyBackends</link>
+            e.g. <literal>my.example.Proxy, my.example.Proxy2</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>
+                <literal>use_key_mangler</literal> - Use a key-mangling
+                function (sha1) to ensure fixed length cache-keys.
+              </term>
+              <listitem>
+                <para>
+                  This is toggle-able for debugging purposes, it is
+                  highly recommended to always leave this set to True.
+                  If the cache backend provides a key-mangler, this
+                  option has no effect.
+                </para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </itemizedlist>
+      <variablelist>
+        <varlistentry>
+          <term>
+            Current keystone systems that have caching capabilities:
+          </term>
+          <listitem>
+            <itemizedlist>
+              <listitem>
+                <variablelist>
+                  <varlistentry>
+                    <term>
+                      <literal>token</literal>
+                    </term>
+                    <listitem>
+                      <para>
+                        The token system has a separate
+                        <literal>cache_time</literal> configuration
+                        option, that can be set to a value above or
+                        below the global
+                        <literal>expiration_time</literal> default,
+                        allowing for different caching behavior from the
+                        other systems in <literal>Keystone</literal>.
+                        This option is set in the
+                        <literal>[token]</literal> section of the
+                        configuration file.
+                      </para>
+                      <para>
+                        The Token Revocation List cache time is handled
+                        by the configuration option
+                        <literal>revocation_cache_time</literal> in the
+                        <literal>[token]</literal> section. The
+                        revocation list is refreshed whenever a token is
+                        revoked. It typically sees significantly more
+                        requests than specific token retrievals or token
+                        validation calls.
+                      </para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+              <listitem>
+                <variablelist>
+                  <varlistentry>
+                    <term>
+                      <literal>assignment</literal>
+                    </term>
+                    <listitem>
+                      <para>
+                        The assignment system has a separate
+                        <literal>cache_time</literal> configuration
+                        option, that can be set to a value above or
+                        below the global
+                        <literal>expiration_time</literal> default,
+                        allowing for different caching behavior from the
+                        other systems in <literal>Keystone</literal>.
+                        This option is set in the
+                        <literal>[assignment]</literal> section of the
+                        configuration file.
+                      </para>
+                      <para>
+                        Currently <literal>assignment</literal> has
+                        caching for <literal>project</literal>,
+                        <literal>domain</literal>, and
+                        <literal>role</literal> specific requests
+                        (primarily around the CRUD actions). Caching is
+                        currently not implemented on grants. The list
+                        (<literal>list_projects</literal>,
+                        <literal>list_domains</literal>, etc) methods
+                        are not subject to caching.
+                      </para>
+                      <blockquote>
+                        <para>
+                          <emphasis role="strong">warning</emphasis>
+                        </para>
+                        <variablelist>
+                          <varlistentry>
+                            <term>
+                              Be aware that if a read-only
+                              <literal>assignment</literal> backend is
+                              in use, the cache
+                            </term>
+                            <listitem>
+                              <para>
+                                will not immediately reflect changes on
+                                the back end. Any given change may take
+                                up to the <literal>cache_time</literal>
+                                (if set in the
+                                <literal>[assignment]</literal> section
+                                of the configuration) or the global
+                                <literal>expiration_time</literal> (set
+                                in the <literal>[cache]</literal>
+                                section of the configuration) before it
+                                is reflected. If this type of delay
+                                (when using a read-only
+                                <literal>assignment</literal> backend)
+                                is an issue, it is recommended that
+                                caching be disabled on
+                                <literal>assignment</literal>. To
+                                disable caching specifically on
+                                <literal>assignment</literal>, in the
+                                <literal>[assignment]</literal> section
+                                of the configuration set
+                                <literal>caching</literal> to
+                                <literal>False</literal>.
+                              </para>
+                            </listitem>
+                          </varlistentry>
+                        </variablelist>
+                      </blockquote>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            For more information about the different backends (and
+            configuration options):
+          </term>
+          <listitem>
+            <itemizedlist>
+              <listitem>
+                <para>
+                  <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/api.html#memory-backend">dogpile.cache.backends.memory</link>
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/api.html#memcached-backends">dogpile.cache.backends.memcached</link>
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/api.html#redis-backends">dogpile.cache.backends.redis</link>
+                </para>
+              </listitem>
+              <listitem>
+                <para>
+                  <link xlink:href="http://dogpilecache.readthedocs.org/en/latest/api.html#file-backends">dogpile.cache.backends.file</link>
+                </para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+</section>
+</section>
+<section xml:id="certificates-for-pki">
+    <title>Certificates for PKI</title>
+    <para>
+      PKI stands for Public Key Infrastructure. Tokens are documents,
+      cryptographically signed using the X509 standard. In order to work
+      correctly token generation requires a public/private key pair. The
+      public key must be signed in an X509 certificate, and the
+      certificate used to sign it must be available as Certificate
+      Authority (CA) certificate. These files can be generated either
+      using the keystone-manage utility, or externally generated. The
+      files need to be in the locations specified by the top level
+      Keystone configuration file as specified in the above section.
+      Additionally, the private key should only be readable by the
+      system user that will run Keystone. The values that specify where
+      to read the certificates are under the
+      <literal>[signing]</literal> section of the configuration file.
+      The configuration values are:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>token_format</literal> - Determines the algorithm
+          used to generate tokens. Can be either <literal>UUID</literal>
+          or <literal>PKI</literal>. Defaults to <literal>PKI</literal>.
+          This option must be used in conjunction with
+          <literal>provider</literal> configuration in the
+          <literal>[token]</literal> section.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>certfile</literal> - Location of certificate used to
+          verify tokens. Default is
+          <literal>/etc/keystone/ssl/certs/signing_cert.pem</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>keyfile</literal> - Location of private key used to
+          sign tokens. Default is
+          <literal>/etc/keystone/ssl/private/signing_key.pem</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>ca_certs</literal> - Location of certificate for the
+          authority that issued the above certificate. Default is
+          <literal>/etc/keystone/ssl/certs/ca.pem</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>ca_key</literal> - Default is
+          <literal>/etc/keystone/ssl/certs/cakey.pem</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>key_size</literal> - Default is
+          <literal>2048</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>valid_days</literal> - Default is
+          <literal>3650</literal>
+        </para>
+      </listitem>
+    </itemizedlist>
+<section xml:id="signing-certificate-issued-by-external-ca">
+      <title>Signing Certificate Issued by External CA</title>
+      <para>
+        You may use a signing certificate issued by an external CA
+        instead of generated by keystone-manage. However, certificate
+        issued by external CA must satisfy the following conditions:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            all certificate and key files must be in Privacy Enhanced
+            Mail (PEM) format
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            private key files must not be protected by a password
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        When using signing certificate issued by an external CA, you do
+        not need to specify <literal>key_size</literal>,
+        <literal>valid_days</literal> and <literal>ca_key</literal> as
+        they will be ignored.
+      </para>
+      <para>
+        The basic workflow for using a signing certificate issed by an
+        external CA involves:
+      </para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Request Signing Certificate from External CA_
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            convert certificate and private key to PEM if needed
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Install External Signing Certificate_
+          </para>
+        </listitem>
+      </orderedlist>
+</section>
+<section xml:id="request-signing-certificate-from-external-ca">
+      <title>Request Signing Certificate from External CA</title>
+      <para>
+        One way to request a signing certificate from an external CA is
+        to first generate a PKCS #10 Certificate Request Syntax (CRS)
+        using OpenSSL CLI.
+      </para>
+      <para>
+        First create a certificate request configuration file (e.g.
+        <literal>cert_req.conf</literal>):
+      </para>
+      <programlisting>
+[ req ]
+default_bits            = 2048
+default_keyfile         = keystonekey.pem
+default_md              = default
+
+prompt                  = no
+distinguished_name      = distinguished_name
+
+[ distinguished_name ]
+countryName             = US
+stateOrProvinceName     = CA
+localityName            = Sunnyvale
+organizationName        = OpenStack
+organizationalUnitName  = Keystone
+commonName              = Keystone Signing
+emailAddress            = keystone@openstack.org
+</programlisting>
+      <para>
+        Then generate a CRS with OpenSSL CLI. <emphasis role="strong">Do
+        not encrypt the generated private key. Must use the -nodes
+        option.</emphasis>
+      </para>
+      <para>
+        For example:
+      </para>
+      <programlisting>
+openssl req -newkey rsa:2048 -keyout signing_key.pem -keyform PEM -out signing_cert_req.pem -outform PEM -config cert_req.conf -nodes
+</programlisting>
+      <para>
+        If everything is successfully, you should end up with
+        <literal>signing_cert_req.pem</literal> and
+        <literal>signing_key.pem</literal>. Send
+        <literal>signing_cert_req.pem</literal> to your CA to request a
+        token signing certificate and make sure to ask the certificate
+        to be in PEM format. Also, make sure your trusted CA certificate
+        chain is also in PEM format.
+      </para>
+</section>
+<section xml:id="install-external-signing-certificate">
+      <title>Install External Signing Certificate</title>
+      <para>
+        Assuming you have the following already:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>signing_cert.pem</literal> - (Keystone token)
+            signing certificate in PEM format
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>signing_key.pem</literal> - corresponding
+            (non-encrypted) private key in PEM format
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>cacert.pem</literal> - trust CA certificate chain
+            in PEM format
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Copy the above to your certificate directory. For example:
+      </para>
+      <programlisting>
+mkdir -p /etc/keystone/ssl/certs
+cp signing_cert.pem /etc/keystone/ssl/certs/
+cp signing_key.pem /etc/keystone/ssl/certs/
+cp cacert.pem /etc/keystone/ssl/certs/
+chmod -R 700 /etc/keystone/ssl/certs
+</programlisting>
+      <para>
+        <emphasis role="strong">Make sure the certificate directory is
+        root-protected.</emphasis>
+      </para>
+      <para>
+        If your certificate directory path is different from the default
+        <literal>/etc/keystone/ssl/certs</literal>, make sure it is
+        reflected in the <literal>[signing]</literal> section of the
+        configuration file.
+      </para>
+</section>
+</section>
+<section xml:id="service-catalog">
+    <title>Service Catalog</title>
+    <para>
+      Keystone provides two configuration options for your service
+      catalog.
+    </para>
+<section xml:id="sql-based-service-catalog-sql.catalog">
+      <title>SQL-based Service Catalog
+      (<literal>sql.Catalog</literal>)</title>
+      <para>
+        A dynamic database-backed driver fully supporting persistent
+        configuration via keystoneclient administration commands (e.g.
+        <literal>keystone endpoint-create</literal>).
+      </para>
+      <para>
+        <literal>keystone.conf</literal> example:
+      </para>
+      <programlisting>
+[catalog]
+driver = keystone.catalog.backends.sql.Catalog
+</programlisting>
+      <blockquote>
+        <para>
+          <emphasis role="strong">note</emphasis>
+        </para>
+        <para>
+          A template_file does not need to be defined for the
+          sql.Catalog driver.
+        </para>
+      </blockquote>
+      <para>
+        To build your service catalog using this driver, see the
+        built-in help:
+      </para>
+      <programlisting>
+$ keystone
+$ keystone help service-create
+$ keystone help endpoint-create
+</programlisting>
+      <para>
+        You can also refer to
+        <link xlink:href="https://github.com/openstack/keystone/blob/master/tools/sample_data.sh">an
+        example in Keystone (tools/sample_data.sh)</link>.
+      </para>
+</section>
+<section xml:id="file-based-service-catalog-templated.templatedcatalog">
+      <title>File-based Service Catalog
+      (<literal>templated.TemplatedCatalog</literal>)</title>
+      <para>
+        The templated catalog is an in-memory backend initialized from a
+        read-only <literal>template_file</literal>. Choose this option
+        only if you know that your service catalog will not change very
+        much over time.
+      </para>
+      <blockquote>
+        <para>
+          <emphasis role="strong">note</emphasis>
+        </para>
+        <para>
+          Attempting to manage your service catalog using keystoneclient
+          commands (e.g. <literal>keystone endpoint-create</literal>)
+          against this driver will result in
+          <literal>HTTP 501 Not Implemented</literal> errors. This is
+          the expected behavior. If you want to use these commands, you
+          must instead use the SQL-based Service Catalog driver.
+        </para>
+      </blockquote>
+      <para>
+        <literal>keystone.conf</literal> example:
+      </para>
+      <programlisting>
+[catalog]
+driver = keystone.catalog.backends.templated.TemplatedCatalog
+template_file = /opt/stack/keystone/etc/default_catalog.templates
+</programlisting>
+      <para>
+        The value of <literal>template_file</literal> is expected to be
+        an absolute path to your service catalog configuration. An
+        example <literal>template_file</literal> is included in
+        Keystone, however you should create your own to reflect your
+        deployment.
+      </para>
+      <para>
+        Another such example is
+        <link xlink:href="https://github.com/openstack-dev/devstack/blob/master/files/default_catalog.templates">available
+        in devstack (files/default_catalog.templates)</link>.
+      </para>
+</section>
+</section>
+<section xml:id="logging">
+    <title>Logging</title>
+    <para>
+      Logging is configured externally to the rest of Keystone.
+      Configure the path to your logging configuration file using the
+      <literal>[DEFAULT] log_config</literal> option of
+      <literal>keystone.conf</literal>. If you wish to route all your
+      logging through syslog, set the
+      <literal>[DEFAULT] use_syslog</literal> option.
+    </para>
+    <para>
+      A sample <literal>log_config</literal> file is included with the
+      project at <literal>etc/logging.conf.sample</literal>. Like other
+      OpenStack projects, Keystone uses the python logging module, which
+      includes extensive configuration options for choosing the output
+      levels and formats.
+    </para>
+</section>
+<section xml:id="monitoring">
+    <title>Monitoring</title>
+    <para>
+      Keystone provides some basic request/response monitoring
+      statistics out of the box.
+    </para>
+    <para>
+      Enable data collection by defining a
+      <literal>stats_monitoring</literal> filter and including it at the
+      beginning of any desired WSGI pipelines:
+    </para>
+    <programlisting>
+[filter:stats_monitoring]
+paste.filter_factory = keystone.contrib.stats:StatsMiddleware.factory
+
+[pipeline:public_api]
+pipeline = stats_monitoring [...] public_service
+</programlisting>
+    <para>
+      Enable the reporting of collected data by defining a
+      <literal>stats_reporting</literal> filter and including it near
+      the end of your <literal>admin_api</literal> WSGI pipeline (After
+      <literal>*_body</literal> middleware and before
+      <literal>*_extension</literal> filters is recommended):
+    </para>
+    <programlisting>
+[filter:stats_reporting]
+paste.filter_factory = keystone.contrib.stats:StatsExtension.factory
+
+[pipeline:admin_api]
+pipeline = [...] json_body stats_reporting ec2_extension [...] admin_service
+</programlisting>
+    <para>
+      Query the admin API for statistics using:
+    </para>
+    <programlisting>
+$ curl -H 'X-Auth-Token: ADMIN' http://localhost:35357/v2.0/OS-STATS/stats
+</programlisting>
+    <para>
+      Reset collected data using:
+    </para>
+    <programlisting>
+$ curl -H 'X-Auth-Token: ADMIN' -X DELETE http://localhost:35357/v2.0/OS-STATS/stats
+</programlisting>
+</section>
+<section xml:id="ssl">
+    <title>SSL</title>
+    <para>
+      Keystone may be configured to support SSL and 2-way SSL
+      out-of-the-box. The X509 certificates used by keystone can be
+      generated by keystone-manage or obtained externally and configured
+      for use with Keystone as described in this section. Here is the
+      description of each of them and their purpose:
+    </para>
+<section xml:id="types-of-certificates">
+      <title>Types of certificates</title>
+      <variablelist>
+        <varlistentry>
+          <term>
+            cacert.pem
+          </term>
+          <listitem>
+            <para>
+              Certificate Authority chain to validate against.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            ssl_cert.pem
+          </term>
+          <listitem>
+            <para>
+              Public certificate for Keystone server.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            middleware.pem
+          </term>
+          <listitem>
+            <para>
+              Public and private certificate for Keystone
+              middleware/client.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            cakey.pem
+          </term>
+          <listitem>
+            <para>
+              Private key for the CA.
+            </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>
+            ssl_key.pem
+          </term>
+          <listitem>
+            <para>
+              Private key for the Keystone server.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      <para>
+        Note that you may choose whatever names you want for these
+        certificates, or combine the public/private keys in the same
+        file if you wish. These certificates are just provided as an
+        example.
+      </para>
+</section>
+<section xml:id="configuration">
+      <title>Configuration</title>
+      <para>
+        To enable SSL modify the etc/keystone.conf file accordingly
+        under the [ssl] section. SSL configuration example using the
+        included sample certificates:
+      </para>
+      <programlisting>
+[ssl]
+enable = True
+certfile = &lt;path to keystone.pem&gt;
+keyfile = &lt;path to keystonekey.pem&gt;
+ca_certs = &lt;path to ca.pem&gt;
+ca_key = &lt;path to cakey.pem&gt;
+cert_required = False
+</programlisting>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>enable</literal>: True enables SSL. Defaults to
+            False.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>certfile</literal>: Path to Keystone public
+            certificate file.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>keyfile</literal>: Path to Keystone private
+            certificate file. If the private key is included in the
+            certfile, the keyfile maybe omitted.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>ca_certs</literal>: Path to CA trust chain.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>cert_required</literal>: Requires client
+            certificate. Defaults to False.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        When generating SSL certificates the following values are read
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>key_size</literal>: Key size to create. Defaults to
+            1024.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>valid_days</literal>: How long the certificate is
+            valid for. Defaults to 3650 (10 years).
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>ca_key</literal>: The private key for the CA.
+            Defaults to
+            <literal>/etc/keystone/ssl/certs/cakey.pem</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>cert_subject</literal>: The subject to set in the
+            certificate. Defaults to
+            /C=US/ST=Unset/L=Unset/O=Unset/CN=localhost. When setting
+            the subject it is important to set CN to be the address of
+            the server so client validation will succeed. This generally
+            means having the subject be at least /CN=&lt;keystone ip&gt;
+          </para>
+        </listitem>
+      </itemizedlist>
+</section>
+<section xml:id="generating-ssl-certificates">
+      <title>Generating SSL certificates</title>
+      <para>
+        Certificates for secure HTTP communication can be generated by:
+      </para>
+      <programlisting>
+$ keystone-manage ssl_setup
+</programlisting>
+      <para>
+        This will create a private key, a public key and a certificate
+        that will be used to encrypt communications with keystone. In
+        the event that a Certificate Authority is not given a testing
+        one will be created.
+      </para>
+      <para>
+        It is likely in a production environment that these certificates
+        will be created and provided externally.
+      </para>
+</section>
+</section>
+<section xml:id="user-crud">
+    <title>User CRUD</title>
+    <para>
+      Keystone provides a user CRUD filter that can be added to the
+      public_api pipeline. This user crud filter allows users to use a
+      HTTP PATCH to change their own password. To enable this extension
+      you should define a user_crud_extension filter, insert it after
+      the <literal>*_body</literal> middleware and before the
+      <literal>public_service</literal> app in the public_api WSGI
+      pipeline in <literal>keystone-paste.ini</literal> e.g.:
+    </para>
+    <programlisting>
+[filter:user_crud_extension]
+paste.filter_factory = keystone.contrib.user_crud:CrudExtension.factory
+
+[pipeline:public_api]
+pipeline = stats_monitoring url_normalize token_auth admin_token_auth xml_body json_body debug ec2_extension user_crud_extension public_service
+</programlisting>
+    <para>
+      Each user can then change their own password with a HTTP PATCH :
+    </para>
+    <programlisting>
+&gt; curl -X PATCH http://localhost:5000/v2.0/OS-KSCRUD/users/&lt;userid&gt; -H &quot;Content-type: application/json&quot;  \
+-H &quot;X_Auth_Token: &lt;authtokenid&gt;&quot; -d '{&quot;user&quot;: {&quot;password&quot;: &quot;ABCD&quot;, &quot;original_password&quot;: &quot;DCBA&quot;}}'
+</programlisting>
+    <para>
+      In addition to changing their password all of the users current
+      tokens will be deleted (if the backend used is sql)
+    </para>
+</section>
+<section xml:id="inherited-role-assignment-extension">
+    <title>Inherited Role Assignment Extension</title>
+    <para>
+      Keystone provides an optional extension that adds the capability
+      to assign roles to a domain that, rather than affect the domain
+      itself, are instead inherited to all projects owned by theat
+      domain. This extension is disabled by default, but can be enabled
+      by including the following in <literal>keystone.conf</literal>.
+    </para>
+    <blockquote>
+      <para>
+        [os_inherit] enabled = True
+      </para>
+    </blockquote>
+</section>
+<section xml:id="token-binding">
+    <title>Token Binding</title>
+    <para>
+      Token binding refers to the practice of embedding information from
+      external authentication providers (like a company's Kerberos
+      server) inside the token such that a client may enforce that the
+      token only be used in conjunction with that specified
+      authentication. This is an additional security mechanism as it
+      means that if a token is stolen it will not be usable without also
+      providing the external authentication.
+    </para>
+    <para>
+      To activate token binding you must specify the types of
+      authentication that token binding should be used for in
+      <literal>keystone.conf</literal> e.g.:
+    </para>
+    <programlisting>
+[token]
+bind = kerberos
+</programlisting>
+    <para>
+      Currently only <literal>kerberos</literal> is supported.
+    </para>
+    <para>
+      To enforce checking of token binding the
+      <literal>enforce_token_bind</literal> parameter should be set to
+      one of the following modes:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>disabled</literal> disable token bind checking
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>permissive</literal> enable bind checking, if a token
+          is bound to a mechanism that is unknown to the server then
+          ignore it. This is the default.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>strict</literal> enable bind checking, if a token is
+          bound to a mechanism that is unknown to the server then this
+          token should be rejected.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>required</literal> enable bind checking and require
+          that at least 1 bind mechanism is used for tokens.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          named enable bind checking and require that the specified
+          authentication mechanism is used. e.g.:
+        </para>
+        <programlisting>
+[token]
+enforce_token_bind = kerberos
+</programlisting>
+        <para>
+          <emphasis>Do not</emphasis> set
+          <literal>enforce_token_bind = named</literal> as there is not
+          an authentication mechanism called <literal>named</literal>.
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+<section xml:id="sample-configuration-files">
+    <title>Sample Configuration Files</title>
+    <para>
+      The <literal>etc/</literal> folder distributed with Keystone
+      contains example configuration files for each Server application.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>etc/keystone.conf.sample</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>etc/keystone-paste.ini</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>etc/logging.conf.sample</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>etc/default_catalog.templates</literal>
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+</section>
+<section xml:id="adding-extensions">
+  <title>Adding Extensions</title>
+<section xml:id="oauth1.0a">
+    <title>OAuth1.0a</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="preparing-your-deployment">
+  <title>Preparing your deployment</title>
+<section xml:id="step-1-configure-keystone.conf">
+    <title>Step 1: Configure keystone.conf</title>
+    <para>
+      Ensure that your <literal>keystone.conf</literal> is configured to
+      use a SQL driver:
+    </para>
+    <programlisting>
+[identity]
+driver = keystone.identity.backends.sql.Identity
+</programlisting>
+    <para>
+      You may also want to configure your <literal>[sql]</literal>
+      settings to better reflect your environment:
+    </para>
+    <programlisting>
+[sql]
+connection = sqlite:///keystone.db
+idle_timeout = 200
+</programlisting>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        It is important that the database that you specify be different
+        from the one containing your existing install.
+      </para>
+    </blockquote>
+</section>
+<section xml:id="step-2-sync-your-new-empty-database">
+    <title>Step 2: Sync your new, empty database</title>
+    <para>
+      You should now be ready to initialize your new database without
+      error, using:
+    </para>
+    <programlisting>
+$ keystone-manage db_sync
+</programlisting>
+    <para>
+      To test this, you should now be able to start
+      <literal>keystone-all</literal> and use the Keystone Client to
+      list your tenants (which should successfully return an empty list
+      from your new database):
+    </para>
+    <programlisting>
+$ keystone --token ADMIN --endpoint http://127.0.0.1:35357/v2.0/ tenant-list
++----+------+---------+
+| id | name | enabled |
++----+------+---------+
++----+------+---------+
+</programlisting>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        We're providing the default SERVICE_TOKEN and SERVICE_ENDPOINT
+        values from <literal>keystone.conf</literal> to connect to the
+        Keystone service. If you changed those values, or deployed
+        Keystone to a different endpoint, you will need to change the
+        provided command accordingly.
+      </para>
+    </blockquote>
+</section>
+</section>
+<section xml:id="initializing-keystone">
+  <title>Initializing Keystone</title>
+  <para>
+    <literal>keystone-manage</literal> is designed to execute commands
+    that cannot be administered through the normal REST API. At the
+    moment, the following calls are supported:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>db_sync</literal>: Sync the database schema.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>pki_setup</literal>: Initialize the certificates for
+        PKI based tokens.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>ssl_setup</literal>: Generate certificates for HTTPS.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Invoking <literal>keystone-manage</literal> by itself will give you
+    additional usage information.
+  </para>
+  <para>
+    The private key used for token signing can only be read by its
+    owner. This prevents unauthorized users from spuriously signing
+    tokens. <literal>keystone-manage pki_setup</literal> Should be run
+    as the same system user that will be running the Keystone service to
+    ensure proper ownership for the private key file and the associated
+    certificates.
+  </para>
+</section>
+<section xml:id="adding-users-tenants-and-roles-with-python-keystoneclient">
+  <title>Adding Users, Tenants, and Roles with
+  python-keystoneclient</title>
+  <para>
+    User, tenants, and roles must be administered using admin
+    credentials. There are two ways to configure
+    <literal>python-keystoneclient</literal> to use admin credentials,
+    using the either an existing token or password credentials.
+  </para>
+<section xml:id="authenticating-with-a-token">
+    <title>Authenticating with a Token</title>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        If your Keystone deployment is brand new, you will need to use
+        this authentication method, along with your
+        <literal>[DEFAULT] admin_token</literal>.
+      </para>
+    </blockquote>
+    <para>
+      To use Keystone with a token, set the following flags:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>--endpoint SERVICE_ENDPOINT</literal>: allows you to
+          specify the Keystone endpoint to communicate with. The default
+          endpoint is <literal>http://localhost:35357/v2.0</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>--token SERVICE_TOKEN</literal>: your service token
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      To administer a Keystone endpoint, your token should be either
+      belong to a user with the <literal>admin</literal> role, or, if
+      you haven't created one yet, should be equal to the value defined
+      by <literal>[DEFAULT] admin_token</literal> in your
+      <literal>keystone.conf</literal>.
+    </para>
+    <para>
+      You can also set these variables in your environment so that they
+      do not need to be passed as arguments each time:
+    </para>
+    <programlisting>
+$ export SERVICE_ENDPOINT=http://localhost:35357/v2.0
+$ export SERVICE_TOKEN=ADMIN
+</programlisting>
+</section>
+<section xml:id="authenticating-with-a-password">
+    <title>Authenticating with a Password</title>
+    <para>
+      To administer a Keystone endpoint, the following user referenced
+      below should be granted the <literal>admin</literal> role.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>--os_username OS_USERNAME</literal>: Name of your
+          user
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>--os_password OS_PASSWORD</literal>: Password for
+          your user
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>--os_tenant_name OS_TENANT_NAME</literal>: Name of
+          your tenant
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>--os_auth_url OS_AUTH_URL</literal>: URL of your
+          Keystone auth server, e.g.
+          <literal>http://localhost:35357/v2.0</literal>
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      You can also set these variables in your environment so that they
+      do not need to be passed as arguments each time:
+    </para>
+    <programlisting>
+$ export OS_USERNAME=my_username
+$ export OS_PASSWORD=my_password
+$ export OS_TENANT_NAME=my_tenant
+</programlisting>
+</section>
+<section xml:id="keystone-api-protection-with-role-based-access-control-rbac">
+    <title>Keystone API protection with Role Based Access Control
+    (RBAC)</title>
+    <para>
+      Like most OpenStack projects, Keystone supports the protection of
+      its APIs by defining policy rules based on an RBAC approach. These
+      are stored in a JSON policy file, the name and location of which
+      is set in the main Keystone configuration file.
+    </para>
+    <para>
+      Each keystone v3 API has a line in the policy file which dictates
+      what level of protection is applied to it, where each line is of
+      the form:
+    </para>
+    <para>
+      &lt;api name&gt;: &lt;rule statement&gt; or &lt;match
+      statement&gt;
+    </para>
+    <para>
+      where
+    </para>
+    <para>
+      &lt;rule statement&gt; can be contain &lt;rule statement&gt; or
+      &lt;match statement&gt;
+    </para>
+    <para>
+      &lt;match statement&gt; is a set of identifiers that must match
+      between the token provided by the caller of the API and the
+      parameters or target entities of the API call in question. For
+      example:
+    </para>
+    <blockquote>
+      <para>
+        &quot;identity:create_user&quot;: [[&quot;role:admin&quot;,
+        &quot;domain_id:%(user.domain_id)s&quot;]]
+      </para>
+    </blockquote>
+    <para>
+      indicates that to create a user you must have the admin role in
+      your token and in addition the domain_id in your token (which
+      implies this must be a domain scoped token) must match the
+      domain_id in the user object you are trying to create. In other
+      words, you must have the admin role on the domain in which you are
+      creating the user, and the token you are using must be scoped to
+      that domain.
+    </para>
+    <para>
+      Each component of a match statement is of the form:
+    </para>
+    <para>
+      &lt;attribute from token&gt;:&lt;constant&gt; or &lt;attribute
+      related to API call&gt;
+    </para>
+    <para>
+      The following attributes are available
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Attributes from token: user_id, the domain_id or project_id
+          depending on the scope, and the list of roles you have within
+          that scope
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Attributes related to API call: Any parameters that are passed
+          into the API call are available, along with any filters
+          specified in the query string. Attributes of objects passed
+          can be refererenced using an object.attribute syntax (e.g.
+          user.domain_id). The target objects of an API are also
+          available using a target.object.attribute syntax. For
+          instance:
+        </para>
+        <blockquote>
+          <para>
+            &quot;identity:delete_user&quot;: [[&quot;role:admin&quot;,
+            &quot;domain_id:%(target.user.domain_id)s&quot;]]
+          </para>
+        </blockquote>
+        <para>
+          would ensure that the user object that is being deleted is in
+          the same domain as the token provided.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The default policy.json file supplied provides a somewhat basic
+      example of API protection, and does not assume any particular use
+      of domains. For multi-domain configuration installations where,
+      for example, a cloud provider wishes to allow adminsistration of
+      the contents of a domain to be delegated, it is recommended that
+      the supplied policy.v3cloudsample.json is used as a basis for
+      creating a suitable production policy file. This example policy
+      file also shows the use of an admin_domain to allow a cloud
+      provider to enable cloud adminstrators to have wider access across
+      the APIs.
+    </para>
+    <para>
+      A clean installation would need to perhaps start with the standard
+      policy file, to allow creation of the admin_domain with the first
+      users within it. The domain_id of the admin domain would then be
+      obtained and could be pasted into a modifed version of
+      policy.v3cloudsample.json which could then be enabled as the main
+      policy file.
+    </para>
+</section>
+<section xml:id="example-usage">
+    <title>Example usage</title>
+    <para>
+      <literal>keystone</literal> is set up to expect commands in the
+      general form of <literal>keystone</literal>
+      <literal>command</literal> <literal>argument</literal>, followed
+      by flag-like keyword arguments to provide additional (often
+      optional) information. For example, the command
+      <literal>user-list</literal> and <literal>tenant-create</literal>
+      can be invoked as follows:
+    </para>
+    <programlisting>
+# Using token auth env variables
+export SERVICE_ENDPOINT=http://127.0.0.1:35357/v2.0/
+export SERVICE_TOKEN=secrete_token
+keystone user-list
+keystone tenant-create --name=demo
+
+# Using token auth flags
+keystone --token=secrete --endpoint=http://127.0.0.1:35357/v2.0/ user-list
+keystone --token=secrete --endpoint=http://127.0.0.1:35357/v2.0/ tenant-create --name=demo
+
+# Using user + password + tenant_name env variables
+export OS_USERNAME=admin
+export OS_PASSWORD=secrete
+export OS_TENANT_NAME=admin
+keystone user-list
+keystone tenant-create --name=demo
+
+# Using user + password + tenant_name flags
+keystone --os_username=admin --os_password=secrete --os_tenant_name=admin user-list
+keystone --os_username=admin --os_password=secrete --os_tenant_name=admin tenant-create --name=demo
+</programlisting>
+</section>
+<section xml:id="tenants">
+    <title>Tenants</title>
+    <para>
+      Tenants are the high level grouping within Keystone that represent
+      groups of users. A tenant is the grouping that owns virtual
+      machines within Nova, or containers within Swift. A tenant can
+      have zero or more users, Users can be associated with more than
+      one tenant, and each tenant - user pairing can have a role
+      associated with it.
+    </para>
+<section xml:id="tenant-create">
+      <title><literal>tenant-create</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            name
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            description (optional, defaults to None)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            enabled (optional, defaults to True)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone tenant-create --name=demo
+</programlisting>
+      <para>
+        creates a tenant named &quot;demo&quot;.
+      </para>
+</section>
+<section xml:id="tenant-delete">
+      <title><literal>tenant-delete</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            tenant_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone tenant-delete f2b7b39c860840dfa47d9ee4adffa0b3
+</programlisting>
+</section>
+</section>
+<section xml:id="users">
+    <title>Users</title>
+<section xml:id="user-create">
+      <title><literal>user-create</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            name
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            pass
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            email
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            tenant_id (optional, defaults to None)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            enabled (optional, defaults to True)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-create
+--name=admin \
+--pass=secrete \
+--tenant_id=2395953419144b67955ac4bab96b8fd2 \
+--email=admin@example.com
+</programlisting>
+</section>
+<section xml:id="user-delete">
+      <title><literal>user-delete</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            user_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-delete f2b7b39c860840dfa47d9ee4adffa0b3
+</programlisting>
+</section>
+<section xml:id="user-list">
+      <title><literal>user-list</literal></title>
+      <para>
+        list users in the system, optionally by a specific tenant
+        (identified by tenant_id)
+      </para>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            tenant_id (optional, defaults to None)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-list
+</programlisting>
+</section>
+<section xml:id="user-update">
+      <title><literal>user-update</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            user_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            name Desired new user name (Optional)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            email Desired new email address (Optional)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            enabled &lt;true|false&gt; Enable or disable user (Optional)
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-update 03c84b51574841ba9a0d8db7882ac645 --email=newemail@example.com
+</programlisting>
+</section>
+<section xml:id="user-password-update">
+      <title><literal>user-password-update</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            user_id
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            password
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-password-update --pass foo 03c84b51574841ba9a0d8db7882ac645
+</programlisting>
+</section>
+</section>
+<section xml:id="roles">
+    <title>Roles</title>
+<section xml:id="role-create">
+      <title><literal>role-create</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            name
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone role-create --name=demo
+</programlisting>
+</section>
+<section xml:id="role-delete">
+      <title><literal>role-delete</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            role_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone role-delete 19d1d3344873464d819c45f521ff9890
+</programlisting>
+</section>
+<section xml:id="role-list">
+      <title><literal>role-list</literal></title>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone role-list
+</programlisting>
+</section>
+<section xml:id="role-get">
+      <title><literal>role-get</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            role_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone role-get 19d1d3344873464d819c45f521ff9890
+</programlisting>
+</section>
+<section xml:id="user-role-add">
+      <title><literal>user-role-add</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            user &lt;user-id&gt;
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            role &lt;role-id&gt;
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            tenant_id &lt;tenant-id&gt;
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-role-add  \
+  --user=96a6ebba0d4c441887aceaeced892585  \
+  --role=f8dd5a2e4dc64a41b96add562d9a764e  \
+  --tenant_id=2395953419144b67955ac4bab96b8fd2
+</programlisting>
+</section>
+<section xml:id="user-role-remove">
+      <title><literal>user-role-remove</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            user &lt;user-id&gt;
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            role &lt;role-id&gt;
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            tenant_id &lt;tenant-id&gt;
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone user-role-remove  \
+  --user=96a6ebba0d4c441887aceaeced892585  \
+  --role=f8dd5a2e4dc64a41b96add562d9a764e  \
+  --tenant_id=2395953419144b67955ac4bab96b8fd2
+</programlisting>
+</section>
+</section>
+<section xml:id="services">
+    <title>Services</title>
+<section xml:id="service-create">
+      <title><literal>service-create</literal></title>
+      <para>
+        keyword arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            name
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            type
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            description
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone service-create \
+--name=nova \
+--type=compute \
+--description=&quot;Nova Compute Service&quot;
+</programlisting>
+</section>
+<section xml:id="service-list">
+      <title><literal>service-list</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            service_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone service-list
+</programlisting>
+</section>
+<section xml:id="service-get">
+      <title><literal>service-get</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            service_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone service-get 08741d8ed88242ca88d1f61484a0fe3b
+</programlisting>
+</section>
+<section xml:id="service-delete">
+      <title><literal>service-delete</literal></title>
+      <para>
+        arguments
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            service_id
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        example:
+      </para>
+      <programlisting>
+$ keystone service-delete 08741d8ed88242ca88d1f61484a0fe3b
+</programlisting>
+</section>
+</section>
+</section>
+<section xml:id="removing-expired-tokens">
+  <title>Removing Expired Tokens</title>
+  <para>
+    In the SQL backend expired tokens are not automatically removed.
+    These tokens can be removed with:
+  </para>
+  <programlisting>
+$ keystone-manage token_flush
+</programlisting>
+  <para>
+    The memcache backend automatically discards expired tokens and so
+    flushing is unnecessary and if attempted will fail with a
+    NotImplemented error.
+  </para>
+</section>
+<section xml:ider">
+  <title>Configuring the LDAP Identity Provider</title>
+  <para>
+    As an alternative to the SQL Database backing store, Keystone can
+    use a directory server to provide the Identity service. An example
+    Schema for openstack would look like this:
+  </para>
+  <programlisting>
+dn: dc=openstack,dc=org
+dc: openstack
+objectClass: dcObject
+objectClass: organizationalUnit
+ou: openstack
+
+dn: ou=Projects,dc=openstack,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: ou=Users,dc=openstack,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=Roles,dc=openstack,dc=org
+objectClass: top
+objectClass: organizationalUnit
+ou: roles
+</programlisting>
+  <para>
+    The corresponding entries in the Keystone configuration file are:
+  </para>
+  <programlisting>
+[ldap]
+url = ldap://localhost
+user = dc=Manager,dc=openstack,dc=org
+password = badpassword
+suffix = dc=openstack,dc=org
+use_dumb_member = False
+allow_subtree_delete = False
+
+user_tree_dn = ou=Users,dc=openstack,dc=org
+user_objectclass = inetOrgPerson
+
+tenant_tree_dn = ou=Projects,dc=openstack,dc=org
+tenant_objectclass = groupOfNames
+
+role_tree_dn = ou=Roles,dc=openstack,dc=org
+role_objectclass = organizationalRole
+</programlisting>
+  <para>
+    The default object classes and attributes are intentionally
+    simplistic. They reflect the common standard objects according to
+    the LDAP RFCs. However, in a live deployment, the correct attributes
+    can be overridden to support a preexisting, more complex schema. For
+    example, in the user object, the objectClass posixAccount from
+    RFC2307 is very common. If this is the underlying objectclass, then
+    the <emphasis>uid</emphasis> field should probably be
+    <emphasis>uidNumber</emphasis> and <emphasis>username</emphasis>
+    field either <emphasis>uid</emphasis> or <emphasis>cn</emphasis>. To
+    change these two fields, the corresponding entries in the Keystone
+    configuration file are:
+  </para>
+  <programlisting>
+[ldap]
+user_id_attribute = uidNumber
+user_name_attribute = cn
+</programlisting>
+  <para>
+    There is a set of allowed actions per object type that you can
+    modify depending on your specific deployment. For example, the users
+    are managed by another tool and you have only read access, in such
+    case the configuration is:
+  </para>
+  <programlisting>
+[ldap]
+user_allow_create = False
+user_allow_update = False
+user_allow_delete = False
+
+tenant_allow_create = True
+tenant_allow_update = True
+tenant_allow_delete = True
+
+role_allow_create = True
+role_allow_update = True
+role_allow_delete = True
+</programlisting>
+  <para>
+    There are some configuration options for filtering users, tenants
+    and roles, if the backend is providing too much output, in such case
+    the configuration will look like:
+  </para>
+  <programlisting>
+[ldap]
+user_filter = (memberof=CN=openstack-users,OU=workgroups,DC=openstack,DC=org)
+tenant_filter =
+role_filter =
+</programlisting>
+  <para>
+    In case that the directory server does not have an attribute enabled
+    of type boolean for the user, there is several configuration
+    parameters that can be used to extract the value from an integer
+    attribute like in Active Directory:
+  </para>
+  <programlisting>
+[ldap]
+user_enabled_attribute = userAccountControl
+user_enabled_mask      = 2
+user_enabled_default   = 512
+</programlisting>
+  <para>
+    In this case the attribute is an integer and the enabled attribute
+    is listed in bit 1, so the if the mask configured
+    <emphasis>user_enabled_mask</emphasis> is different from 0, it gets
+    the value from the field <emphasis>user_enabled_attribute</emphasis>
+    and it makes an ADD operation with the value indicated on
+    <emphasis>user_enabled_mask</emphasis> and if the value matches the
+    mask then the account is disabled.
+  </para>
+  <para>
+    It also saves the value without mask to the user identity in the
+    attribute <emphasis>enabled_nomask</emphasis>. This is needed in
+    order to set it back in case that we need to change it to
+    enable/disable a user because it contains more information than the
+    status like password expiration. Last setting
+    <emphasis>user_enabled_mask</emphasis> is needed in order to create
+    a default value on the integer attribute (512 = NORMAL ACCOUNT on
+    AD)
+  </para>
+  <para>
+    In case of Active Directory the classes and attributes could not
+    match the specified classes in the LDAP module so you can configure
+    them like:
+  </para>
+  <programlisting>
+[ldap]
+user_objectclass         = person
+user_id_attribute        = cn
+user_name_attribute      = cn
+user_mail_attribute      = mail
+user_enabled_attribute   = userAccountControl
+user_enabled_mask        = 2
+user_enabled_default     = 512
+user_attribute_ignore    = tenant_id,tenants
+tenant_objectclass       = groupOfNames
+tenant_id_attribute      = cn
+tenant_member_attribute  = member
+tenant_name_attribute    = ou
+tenant_desc_attribute    = description
+tenant_enabled_attribute = extensionName
+tenant_attribute_ignore  =
+role_objectclass         = organizationalRole
+role_id_attribute        = cn
+role_name_attribute      = ou
+role_member_attribute    = roleOccupant
+role_attribute_ignore    =
+</programlisting>
+  <para>
+    If you are using a directory server to provide the Identity service,
+    it is strongly recommended that you utilize a secure connection from
+    Keystone to the directory server. In addition to supporting ldaps,
+    Keystone also provides Transport Layer Security (TLS) support. There
+    are some basic configuration options for enabling TLS, identifying a
+    single file or directory that contains certificates for all the
+    Certificate Authorities that the Keystone LDAP client will
+    recognize, and declaring what checks the client should perform on
+    server certificates. This functionality can easily be configured as
+    follows:
+  </para>
+  <programlisting>
+[ldap]
+use_tls = True
+tls_cacertfile = /etc/keystone/ssl/certs/cacert.pem
+tls_cacertdir = /etc/keystone/ssl/certs/
+tls_req_cert = demand
+</programlisting>
+  <para>
+    A few points worth mentioning regarding the above options. If both
+    tls_cacertfile and tls_cacertdir are set then tls_cacertfile will be
+    used and tls_cacertdir is ignored. Furthermore, valid options for
+    tls_req_cert are demand, never, and allow. These correspond to the
+    standard options permitted by the TLS_REQCERT TLS option.
+  </para>
+</section>
+</section>

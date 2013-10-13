@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Object">
+<title>Object</title>
+<section xml:id="object-server">
+  <title>Object Server</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  </para>
+</sect1>
+</section>
+<section xml:id="object-replicator">
+  <title>Object Replicator</title>
+  <para>
+  </para>
+</section>
+<section xml:id="object-updater">
+  <title>Object Updater</title>
+  <para>
+  </para>
+</section>
+<section xml:id="object-auditor">
+  <title>Object Auditor</title>
+  <para>
+  </para>
+</section>
+</section>

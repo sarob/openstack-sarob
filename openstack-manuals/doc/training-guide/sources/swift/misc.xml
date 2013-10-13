@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Misc">
+<title>Misc</title>
+<section xml:id="exceptions">
+  <title>Exceptions</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  </para>
+</sect1>
+</section>
+<section xml:id="constraints">
+  <title>Constraints</title>
+  <para>
+  </para>
+</section>
+<section xml:id="utils">
+  <title>Utils</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tempauth">
+  <title>TempAuth</title>
+  <para>
+  </para>
+</section>
+<section xml:id="keystoneauth">
+  <title>KeystoneAuth</title>
+  <para>
+  </para>
+</section>
+<section xml:id="acls">
+  <title>ACLs</title>
+  <para>
+  </para>
+</section>
+<section xml:id="wsgi">
+  <title>WSGI</title>
+  <para>
+  </para>
+</section>
+<section xml:id="direct-client">
+  <title>Direct Client</title>
+  <para>
+  </para>
+</section>
+<section xml:id="internal-client">
+  <title>Internal Client</title>
+  <para>
+  </para>
+</section>
+<section xml:id="buffered-http">
+  <title>Buffered HTTP</title>
+  <para>
+  </para>
+</section>
+<section xml:id="healthcheck">
+  <title>Healthcheck</title>
+  <para>
+  </para>
+</section>
+<section xml:id="recon">
+  <title>Recon</title>
+  <para>
+  </para>
+</section>
+<section xml:id="memcached">
+  <title>MemCacheD</title>
+  <para>
+  </para>
+</section>
+<section xml:id="manager">
+  <title>Manager</title>
+  <para>
+  </para>
+</section>
+<section xml:id="ratelimit">
+  <title>Ratelimit</title>
+  <para>
+  </para>
+</section>
+<section xml:id="staticweb">
+  <title>StaticWeb</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tempurl">
+  <title>TempURL</title>
+  <para>
+  </para>
+</section>
+<section xml:id="formpost">
+  <title>FormPost</title>
+  <para>
+  </para>
+</section>
+<section xml:id="domain-remap">
+  <title>Domain Remap</title>
+  <para>
+  </para>
+</section>
+<section xml:id="cname-lookup">
+  <title>CNAME Lookup</title>
+  <para>
+  </para>
+</section>
+<section xml:id="proxy-logging">
+  <title>Proxy Logging</title>
+  <para>
+  </para>
+</section>
+<section xml:id="bulk-operations-delete-and-archive-auto-extraction">
+  <title>Bulk Operations (Delete and Archive Auto Extraction)</title>
+  <para>
+  </para>
+</section>
+<section xml:id="container-quotas">
+  <title>Container Quotas</title>
+  <para>
+  </para>
+</section>
+<section xml:id="account-quotas">
+  <title>Account Quotas</title>
+  <para>
+  </para>
+</section>
+<section xml:id="static-large-objects">
+  <title>Static Large Objects</title>
+  <para>
+  </para>
+</section>
+<section xml:id="list-endpoints">
+  <title>List Endpoints</title>
+  <para>
+  </para>
+</section>
+</section>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Continuous-Integration-with-Jenkins">
+<title>Continuous Integration with Jenkins</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Cinder uses a <ulink url="http://jenkins-ci.org">Jenkins</ulink>
+  server to automate development tasks. The Jenkins front-end is at
+  <ulink url="http://jenkins.openstack.org">http://jenkins.openstack.org</ulink>.
+  You must have an account on
+  <ulink url="http://launchpad.net">Launchpad</ulink> to be able to
+  access the OpenStack Jenkins site.
+</para>
+<para>
+  Jenkins performs tasks such as:
+</para>
+<variablelist>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/view/Cinder/job/gate-cinder-unittests">gate-cinder-unittests</ulink>
+    </term>
+    <listitem>
+      <para>
+        Run unit tests on proposed code changes that have been reviewed.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/view/Cinder/job/gate-cinder-pep8">gate-cinder-pep8</ulink>
+    </term>
+    <listitem>
+      <para>
+        Run PEP8 checks on proposed code changes that have been
+        reviewed.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/view/Cinder/job/gate-cinder-merge">gate-cinder-merge</ulink>
+    </term>
+    <listitem>
+      <para>
+        Merge reviewed code into the git repository.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/view/Cinder/job/cinder-coverage">cinder-coverage</ulink>
+    </term>
+    <listitem>
+      <para>
+        Calculate test coverage metrics.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/view/Cinder/job/cinder-docs">cinder-docs</ulink>
+    </term>
+    <listitem>
+      <para>
+        Build this documentation and push it to
+        <ulink url="http://cinder.openstack.org">http://cinder.openstack.org</ulink>.
+      </para>
+    </listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>
+      <ulink url="https://jenkins.openstack.org/job/cinder-tarball">cinder-tarball</ulink>
+    </term>
+    <listitem>
+      <para>
+        Do <literal>python setup.py sdist</literal> to create a tarball
+        of the cinder code and upload it to
+        <ulink url="http://cinder.openstack.org/tarballs">http://cinder.openstack.org/tarballs</ulink>
+      </para>
+    </listitem>
+  </varlistentry>
+</variablelist>
+</article>
+</section>

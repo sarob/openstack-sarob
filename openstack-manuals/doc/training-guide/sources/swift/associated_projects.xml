@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Associated-Projects">
+<title>Associated Projects</title>
+<section xml:id="application-bindings">
+  <title>Application Bindings</title>
+  <itemizedlist>
+    <listitem>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>        OpenStack supported binding:
+      </para>
+      <blockquote>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <ulink url="http://pypi.python.org/pypi/python-swiftclient">Python-SwiftClient</ulink>
+            </para>
+          </listitem>
+        </itemizedlist>
+      </blockquote>
+    </listitem>
+    <listitem>
+      <para>
+        Unofficial libraries and bindings:
+      </para>
+      <blockquote>
+        <itemizedlist>
+          <listitem>
+            <para>
+              <ulink url="http://php-opencloud.com">PHP-opencloud</ulink>
+              - Official Rackspace PHP bindings that should work for
+              other Swift deployments too.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/rackspace/pyrax">PyRAX</ulink>
+              - Official Rackspace Python bindings for CloudFiles that
+              should work for other Swift deployments too.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/rackspace/openstack.net/">openstack.net</ulink>
+              - Official Rackspace .NET bindings that should work for
+              other Swift deployments too.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/pandemicsyn/RSwift">RSwift</ulink>
+              - R API bindings.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/ncw/swift">Go language
+              bindings</ulink>
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/selectel/supload">supload</ulink>
+              - Bash script to upload file to cloud storage based on
+              OpenStack Swift API.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="http://libcloud.apache.org">libcloud</ulink> -
+              Apache Libcloud - a unified interface in Python for
+              different clouds with OpenStack Swift support.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/suniln/SwiftBox">SwiftBox</ulink>
+              - C# library using RestSharp
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="http://jclouds.incubator.apache.org/documentation/quickstart/openstack/">jclouds</ulink>
+              - Java library offering bindings for all OpenStack
+              projects
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              <ulink url="https://github.com/dkocher/java-openstack-swift">java-openstack-swift</ulink>
+              - Java bindings for OpenStack Swift
+            </para>
+          </listitem>
+        </itemizedlist>
+      </blockquote>
+    </listitem>
+  </itemizedlist>
+</sect1>
+</section>
+<section xml:id="authentication">
+  <title>Authentication</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/openstack/keystone">Keystone</link>
+        - Official Identity Service for OpenStack.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/gholt/swauth">Swauth</link> -
+        Older Swift authentication service that only requires Swift
+        itself.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/CloudVPS/swift-basicauth">Basicauth</link>
+        - HTTP Basic authentication support (keystone backed).
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="command-line-access">
+  <title>Command Line Access</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/gholt/swiftly">Swiftly</link> -
+        Alternate command line access to Swift with direct (no proxy)
+        access capabilities as well.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="log-processing">
+  <title>Log Processing</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/notmyname/slogging">Slogging</link>
+        - Basic stats and logging tools.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="monitoring-statistics">
+  <title>Monitoring &amp; Statistics</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/pandemicsyn/swift-informant">Swift
+        Informant</link> - Swift Proxy Middleware to send events to a
+        statsd instance.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="content-distribution-network-integration">
+  <title>Content Distribution Network Integration</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/dpgoetz/sos">SOS</link> - Swift
+        Origin Server.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="alternative-api">
+  <title>Alternative API</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/fujita/swift3">Swift3</link> -
+        Amazon S3 API emulation.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/osaddon/cdmi">CDMI</link> - CDMI
+        support
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="custom-logger-hooks">
+  <title>Custom Logger Hooks</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/pandemicsyn/swift-sentry">swift-sentry</link>
+        - Sentry exception reporting for Swift
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="other">
+  <title>Other</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/openstack/glance">Glance</link>
+        - Provides services for discovering, registering, and retrieving
+        virtual machine images (for OpenStack Compute [Nova], for
+        example).
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://github.com/CloudVPS/better-staticweb">Better
+        Staticweb</link> - Makes swift containers accessible by
+        default.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

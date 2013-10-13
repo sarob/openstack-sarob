@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Keystone-Event-Notifications">
+<title>Keystone Event Notifications</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Keystone provides notifications about usage data so that 3rd party
+  applications can use the data for billing, monitoring, or quota
+  purposes. This document describes the current inclusions and
+  exclusions for Keystone usage notifications.
+</para>
+</section>
+<section xml:id="notifications-for-createupdatedelete-events">
+  <title>Notifications for Create/Update/Delete Events</title>
+  <para>
+    A notification is sent when a resource is successfully
+    <literal>created</literal>, <literal>updated</literal>, or
+    <literal>deleted</literal>. The following resource types (where a
+    <literal>&lt;resource type&gt;</literal> is always a singular noun)
+    produce notifications:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>user</literal>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>project</literal> (i.e. &quot;tenant&quot;)
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    The following message template is used to form a message when an
+    operation on a resource completes successfully:
+  </para>
+  <programlisting>
+{
+    &quot;event_type&quot;: &quot;identity.&lt;resource type&gt;.&lt;operation&gt;&quot;,
+    &quot;message_id&quot;: &quot;&lt;message ID&gt;&quot;,
+    &quot;payload&quot;: {
+        &quot;resource_info&quot;: &quot;&lt;resource ID&gt;&quot;
+    },
+    &quot;priority&quot;: &quot;INFO&quot;,
+    &quot;publisher_id&quot;: &quot;identity.&lt;hostname&gt;&quot;,
+    &quot;timestamp&quot;: &quot;&lt;timestamp&gt;&quot;
+}
+</programlisting>
+  <para>
+    Notifications for create, update and delete events are all similar
+    to each other, where either <literal>created</literal>,
+    <literal>updated</literal> or <literal>deleted</literal> is inserted
+    as the <literal>&lt;operation&gt;</literal> in the above
+    notification's <literal>event_type</literal>.
+  </para>
+  <para>
+    If the operation fails, the notification won't be sent, and no
+    special error notification will be sent. Information about the error
+    is handled through normal exception paths.
+  </para>
+<section xml:id="notification-example">
+    <title>Notification Example</title>
+    <para>
+      This is an example of a notification sent for a newly created
+      user:
+    </para>
+    <programlisting>
+{
+    &quot;event_type&quot;: &quot;identity.user.created&quot;,
+    &quot;message_id&quot;: &quot;0156ee79-b35f-4cef-ac37-d4a85f231c69&quot;,
+    &quot;payload&quot;: {
+        &quot;resource_info&quot;: &quot;671da331c47d4e29bb6ea1d270154ec3&quot;
+    },
+    &quot;priority&quot;: &quot;INFO&quot;,
+    &quot;publisher_id&quot;: &quot;identity.host1234&quot;,
+    &quot;timestamp&quot;: &quot;2013-08-29 19:03:45.960280&quot;
+}
+</programlisting>
+</section>
+</section>
+</section>

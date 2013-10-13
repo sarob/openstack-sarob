@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Unit-Tests">
+<title>Unit Tests</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Cinder contains a suite of unit tests, in the cinder/tests directory.
+</para>
+<para>
+  Any proposed code change will be automatically rejected by the
+  OpenStack Jenkins server <footnote>
+    <para>
+      See jenkins.
+    </para>
+  </footnote> if the change causes unit test failures.
+</para>
+</section>
+<section xml:id="running-the-tests">
+  <title>Running the tests</title>
+  <para>
+    Run the unit tests by doing:
+  </para>
+  <programlisting>
+./run_tests.sh
+</programlisting>
+  <para>
+    This script is a wrapper around the
+    <link xlink:href="http://code.google.com/p/python-nose/">nose</link>
+    testrunner and the
+    <link xlink:href="https://github.com/jcrocholl/pep8">pep8</link> checker.
+  </para>
+</section>
+<section xml:id="flags">
+  <title>Flags</title>
+  <para>
+    The <literal>run_tests.sh</literal> script supports several flags.
+    You can view a list of flags by doing:
+  </para>
+  <programlisting>
+run_tests.sh -h
+</programlisting>
+  <para>
+    This will show the following help information:
+  </para>
+  <programlisting>
+Usage: ./run_tests.sh [OPTION]...
+Run Cinder's test suite(s)
+
+  -V, --virtual-env        Always use virtualenv.  Install automatically if not present
+  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment
+  -s, --no-site-packages   Isolate the virtualenv from the global Python environment
+  -r, --recreate-db        Recreate the test database (deprecated, as this is now the default).
+  -n, --no-recreate-db     Don't recreate the test database.
+  -x, --stop               Stop running tests after the first error or failure.
+  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added.
+  -p, --pep8               Just run pep8
+  -P, --no-pep8            Don't run pep8
+  -c, --coverage           Generate coverage report
+  -h, --help               Print this usage message
+  --hide-elapsed           Don't print the elapsed time for each test along with slow test list
+</programlisting>
+  <para>
+    Because <literal>run_tests.sh</literal> is a wrapper around nose, it
+    also accepts the same flags as nosetests. See the
+    <link xlink:href="http://readthedocs.org/docs/nose/en/latest/usage.html#options">nose
+    options documentation</link> for details about these additional
+    flags.
+  </para>
+</section>
+<section xml:id="running-a-subset-of-tests">
+  <title>Running a subset of tests</title>
+  <para>
+    Instead of running all tests, you can specify an individual
+    directory, file, class, or method that contains test code.
+  </para>
+  <para>
+    To run the tests in the <literal>cinder/tests/scheduler</literal>
+    directory:
+  </para>
+  <programlisting>
+./run_tests.sh scheduler
+</programlisting>
+  <para>
+    To run the tests in the
+    <literal>cinder/tests/test_libvirt.py</literal> file:
+  </para>
+  <programlisting>
+./run_tests.sh test_libvirt
+</programlisting>
+  <para>
+    To run the tests in the HostStateTestCase class in
+    <literal>cinder/tests/test_libvirt.py</literal>:
+  </para>
+  <programlisting>
+./run_tests.sh test_libvirt:HostStateTestCase
+</programlisting>
+  <para>
+    To run the ToPrimitiveTestCase.test_dict test method in
+    <literal>cinder/tests/test_utils.py</literal>:
+  </para>
+  <programlisting>
+./run_tests.sh test_utils:ToPrimitiveTestCase.test_dict
+</programlisting>
+</section>
+<section xml:id="suppressing-logging-output-when-tests-fail">
+  <title>Suppressing logging output when tests fail</title>
+  <para>
+    By default, when one or more unit test fails, all of the data sent
+    to the logger during the failed tests will appear on standard
+    output, which typically consists of many lines of texts. The logging
+    output can make it difficult to identify which specific tests have
+    failed, unless your terminal has a large scrollback buffer or you
+    have redirected output to a file.
+  </para>
+  <para>
+    You can suppress the logging output by calling
+    <literal>run_tests.sh</literal> with the nose flag:
+  </para>
+  <programlisting>
+--nologcapture
+</programlisting>
+</section>
+<section xml:id="virtualenv">
+  <title>Virtualenv</title>
+  <para>
+    By default, the tests use the Python packages installed inside a
+    virtualenv <footnote>
+      <para>
+        See development.environment for more details about the use of
+        virtualenv.
+      </para>
+    </footnote>. (This is equivalent to using the
+    <literal>-V, --virtualenv</literal> flag). If the virtualenv does
+    not exist, it will be created the first time the tests are run.
+  </para>
+  <para>
+    If you wish to recreate the virtualenv, call
+    <literal>run_tests.sh</literal> with the flag:
+  </para>
+  <programlisting>
+-f, --force
+</programlisting>
+  <para>
+    Recreating the virtualenv is useful if the package dependencies have
+    changed since the virtualenv was last created. If the
+    <literal>requirements.txt</literal> or
+    <literal>tools/install_venv.py</literal> files have changed, it's a
+    good idea to recreate the virtualenv.
+  </para>
+  <para>
+    By default, the unit tests will see both the packages in the
+    virtualenv and the packages that have been installed in the Python
+    global environment. In some cases, the packages in the Python global
+    environment may cause a conflict with the packages in the
+    virtualenv. If this occurs, you can isolate the virtualenv from the
+    global environment by using the flag:
+  </para>
+  <programlisting>
+-s, --no-site packages
+</programlisting>
+  <para>
+    If you do not wish to use a virtualenv at all, use the flag:
+  </para>
+  <programlisting>
+-N, --no-virtual-env
+</programlisting>
+</section>
+<section xml:id="database">
+  <title>Database</title>
+  <para>
+    Some of the unit tests make queries against an sqlite database
+    <footnote>
+      <para>
+        There is an effort underway to use a fake DB implementation for
+        the unit tests. See
+        <link xlink:href="https://lists.launchpad.net/openstack/msg05604.html">https://lists.launchpad.net/openstack/msg05604.html</link>
+      </para>
+    </footnote>. By default, the test database
+    (<literal>tests.sqlite</literal>) is deleted and recreated each time
+    <literal>run_tests.sh</literal> is invoked (This is equivalent to
+    using the <literal>-r, --recreate-db</literal> flag). To reduce
+    testing time if a database already exists it can be reused by using
+    the flag:
+  </para>
+  <programlisting>
+-n, --no-recreate-db
+</programlisting>
+  <para>
+    Reusing an existing database may cause tests to fail if the schema
+    has changed. If any files in the
+    <literal>cinder/db/sqlalchemy</literal> have changed, it's a good
+    idea to recreate the test database.
+  </para>
+</section>
+<section xml:id="gotchas">
+  <title>Gotchas</title>
+  <para>
+    <emphasis role="strong">Running Tests from Shared Folders</emphasis>
+  </para>
+  <para>
+    If you are running the unit tests from a shared folder, you may see
+    tests start to fail or stop completely as a result of Python
+    lockfile issues <footnote>
+      <para>
+        See Vish's comment in this bug report:
+        <link xlink:href="https://bugs.launchpad.net/cinder/+bug/882933">https://bugs.launchpad.net/cinder/+bug/882933</link>
+      </para>
+    </footnote>. You can get around this by manually setting or updating
+    the following line in
+    <literal>cinder/tests/conf_fixture.py</literal>:
+  </para>
+  <programlisting>
+CONF['lock_path'].SetDefault('/tmp')
+</programlisting>
+  <para>
+    Note that you may use any location (not just
+    <literal>/tmp</literal>!) as long as it is not a shared folder.
+  </para>
+  <para>
+    <emphasis role="strong">Footnotes</emphasis>
+  </para>
+</section>
+</section>

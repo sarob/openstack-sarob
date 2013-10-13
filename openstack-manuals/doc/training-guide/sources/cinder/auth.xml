@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Authentication-and-Authorization">
+<title>Authentication and Authorization</title>
+<section xml:id="the-cinder.quota-module">
+  <title>The cinder.quota Module</title>
+<section xml:id="the-cinder.auth.signer-module">
+    <title>The cinder.auth.signer Module</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    </para>
+  </sect2>
+</sect1>
+</section>
+<section xml:id="auth-manager">
+  <title>Auth Manager</title>
+<section xml:id="the-cinder.auth.manager-module">
+    <title>The cinder.auth.manager Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-auth_unittest-module">
+    <title>The auth_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-access_unittest-module">
+    <title>The access_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-quota_unittest-module">
+    <title>The quota_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="legacy-docs">
+  <title>Legacy Docs</title>
+  <para>
+    Cinder provides RBAC (Role-based access control) of the AWS-type
+    APIs. We define the following roles:
+  </para>
+  <para>
+    Roles-Based Access Control of AWS-style APIs using SAML Assertions
+    “Achieving FIPS 199 Moderate certification of a hybrid cloud
+    environment using CloudAudit and declarative C.I.A. classifications”
+  </para>
+</section>
+<section xml:id="introduction">
+  <title>Introduction</title>
+  <para>
+    We will investigate one method for integrating an AWS-style API with
+    US eAuthentication-compatible federated authentication systems, to
+    achieve access controls and limits based on traditional operational
+    roles. Additionally, we will look at how combining this approach,
+    with an implementation of the CloudAudit APIs, will allow us to
+    achieve a certification under FIPS 199 Moderate classification for a
+    hybrid cloud environment.
+  </para>
+</section>
+<section xml:id="relationship-of-us-eauth-to-rbac">
+  <title>Relationship of US eAuth to RBAC</title>
+  <para>
+    Typical implementations of US eAuth authentication systems are
+    structured as follows:
+  </para>
+  <programlisting>
+[ MS Active Directory or other federated LDAP user store ]
+  --&gt; backends to…
+[ SUN Identity Manager or other SAML Policy Controller ]
+  --&gt; maps URLs to groups…
+[ Apache Policy Agent in front of eAuth-secured Web Application ]
+</programlisting>
+  <para>
+    In more ideal implementations, the remainder of the
+    application-specific account information is stored either in
+    extended schema on the LDAP server itself, via the use of a
+    translucent LDAP proxy, or in an independent datastore keyed off of
+    the UID provided via SAML assertion.
+  </para>
+</section>
+<section xml:id="roles">
+  <title>Roles</title>
+  <para>
+    AWS API calls are traditionally secured via Access and Secret Keys,
+    which are used to sign API calls, along with traditional timestamps
+    to prevent replay attacks. The APIs can be logically grouped into
+    sets that align with five typical roles:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Base User
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        System Administrator/Developer (currently have the same
+        permissions)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Network Administrator
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Project Manager
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Cloud Administrator/IT-Security (currently have the same
+        permissions)
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    There is an additional, conceptual end-user that may or may not have
+    API access:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        (EXTERNAL) End-user / Third-party User
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Basic operations are available to any :
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Describe Instances
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Describe Images
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Describe Volumes
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Describe Keypairs
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Create Keypair
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Delete Keypair
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Create, Upload, Delete: Buckets and Keys (Object Store)
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    System Administrators/Developers/Project Manager:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Create, Attach, Delete Volume (Block Store)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Launch, Reboot, Terminate Instance
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Register/Unregister Machine Image (project-wide)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Request / Review CloudAudit Scans
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Project Manager:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Add and remove other users (currently no api)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Set roles (currently no api)
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Network Administrator:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Change Machine Image properties (public / private)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Change Firewall Rules, define Security Groups
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Allocate, Associate, Deassociate Public IP addresses
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Cloud Administrator/IT-Security:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        All permissions
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="enhancements">
+  <title>Enhancements</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        SAML Token passing
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        REST interfaces
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        SOAP interfaces
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Wrapping the SAML token into the API calls. Then store the UID
+    (fetched via backchannel) into the instance metadata, providing
+    end-to-end auditability of ownership and responsibility, without
+    PII.
+  </para>
+</section>
+<section xml:id="cloudaudit-apis">
+  <title>CloudAudit APIs</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Request formats
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Response formats
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Stateless asynchronous queries
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    CloudAudit queries may spawn long-running processes (similar to
+    launching instances, etc.) They need to return a ReservationId in
+    the same fashion, which can be returned in further queries for
+    updates. RBAC of CloudAudit API calls is critical, since detailed
+    system information is a system vulnerability.
+  </para>
+</section>
+<section xml:id="type-declarations">
+  <title>Type declarations</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Data declarations – Volumes and Objects
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        System declarations – Instances
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Existing API calls to launch instances specific a single, combined
+    “type” flag. We propose to extend this with three additional type
+    declarations, mapping to the “Confidentiality, Integrity,
+    Availability” classifications of FIPS 199. An example API call would
+    look like:
+  </para>
+  <programlisting>
+RunInstances type=m1.large number=1 secgroup=default key=mykey confidentiality=low integrity=low availability=low
+</programlisting>
+  <para>
+    These additional parameters would also apply to creation of block
+    storage volumes (along with the existing parameter of ‘size’), and
+    creation of object storage ‘buckets’. (C.I.A. classifications on a
+    bucket would be inherited by the keys within this bucket.)
+  </para>
+</section>
+<section xml:id="request-brokering">
+  <title>Request Brokering</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Cloud Interop
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        IMF Registration / PubSub
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Digital C&amp;A
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Establishing declarative semantics for individual API calls will
+    allow the cloud environment to seamlessly proxy these API calls to
+    external, third-party vendors – when the requested CIA levels match.
+  </para>
+  <para>
+    See related work within the Infrastructure 2.0 working group for
+    more information on how the IMF Metadata specification could be
+    utilized to manage registration of these vendors and their C&amp;A
+    credentials.
+  </para>
+</section>
+<section xml:id-data-centers">
+  <title>Dirty Cloud – Hybrid Data Centers</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        CloudAudit bridge interfaces
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Anything in the ARP table
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    A hybrid cloud environment provides dedicated, potentially
+    co-located physical hardware with a network interconnect to the
+    project or users’ cloud virtual network.
+  </para>
+  <para>
+    This interconnect is typically a bridged VPN connection. Any
+    machines that can be bridged into a hybrid environment in this
+    fashion (at Layer 2) must implement a minimum version of the
+    CloudAudit spec, such that they can be queried to provide a complete
+    picture of the IT-sec runtime environment.
+  </para>
+  <para>
+    Network discovery protocols (ARP, CDP) can be applied in this case,
+    and existing protocols (SNMP location data, DNS LOC records)
+    overloaded to provide CloudAudit information.
+  </para>
+</section>
+<section xml:id="the-details">
+  <title>The Details</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Preliminary Roles Definitions
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Categorization of available API calls
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        SAML assertion vocabulary
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="system-limits">
+  <title>System limits</title>
+  <para>
+    The following limits need to be defined and enforced:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Total number of instances allowed (user / project)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Total number of instances, per instance type (user / project)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Total number of volumes (user / project)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Maximum size of volume
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Cumulative size of all volumes
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Total use of object storage (GB)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Total number of Public IPs
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="further-challenges">
+  <title>Further Challenges</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Prioritization of users / jobs in shared computing environments
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Incident response planning
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Limit launch of instances to specific security groups based on
+        AMI
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Store AMIs in LDAP for added property control
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

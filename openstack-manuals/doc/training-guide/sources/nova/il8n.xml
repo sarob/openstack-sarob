@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Internationalization">
+<title>Internationalization</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  nova uses
+  <ulink url="http://docs.python.org/library/gettext.html">gettext</ulink>
+  so that user-facing strings such as log messages appear in the
+  appropriate language in different locales.
+</para>
+<para>
+  To use gettext, make sure that the strings passed to the logger are
+  wrapped in a <literal>_()</literal> function call. For example:
+</para>
+<programlisting>
+LOG.debug(_(&quot;block_device_mapping %s&quot;), block_device_mapping)
+</programlisting>
+<para>
+  Do not use <literal>locals()</literal> for formatting messages
+  because: 1. It is not as clear as using explicit dicts. 2. It could
+  produce hidden errors during refactoring. 3. Changing the name of a
+  variable causes a change in the message. 4. It creates a lot of
+  otherwise unused variables.
+</para>
+<para>
+  If you do not follow the project conventions, your code may cause the
+  LocalizationTestCase.test_multiple_positional_format_placeholders test
+  to fail in nova/tests/test_localization.py.
+</para>
+<para>
+  The <literal>_()</literal> function is found by doing:
+</para>
+<programlisting>
+from nova.openstack.common.gettextutils import _
+</programlisting>
+</article>
+</section>

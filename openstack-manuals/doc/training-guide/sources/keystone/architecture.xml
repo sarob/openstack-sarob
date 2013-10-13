@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Keystone-Architecture">
+<title>Keystone Architecture</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Much of the design is precipitated from the expectation that the auth
+  backends for most deployments will actually be shims in front of
+  existing user systems.
+</para>
+</section>
+<section xml:id="the-services">
+  <title>The Services</title>
+  <para>
+    Keystone is organized as a group of internal services exposed on one
+    or many endpoints. Many of these services are used in a combined
+    fashion by the frontend, for example an authenticate call will
+    validate user/tenant credentials with the Identity service and, upon
+    success, create and return a token with the Token service.
+  </para>
+<section xml:identity">
+    <title>Identity</title>
+    <para>
+      The Identity service provides auth credential validation and data
+      about Users, Tenants and Roles, as well as any associated
+      metadata.
+    </para>
+    <para>
+      In the basic case all this data is managed by the service,
+      allowing the service to manage all the CRUD associated with the
+      data.
+    </para>
+    <para>
+      In other cases, this data is pulled, by varying degrees, from an
+      authoritative backend service. An example of this would be when
+      backending on LDAP. See LDAP Backend below for more details.
+    </para>
+</section>
+<section xml:id="token">
+    <title>Token</title>
+    <para>
+      The Token service validates and manages Tokens used for
+      authenticating requests once a user/tenant's credentials have
+      already been verified.
+    </para>
+</section>
+<section xml:id="catalog">
+    <title>Catalog</title>
+    <para>
+      The Catalog service provides an endpoint registry used for
+      endpoint discovery.
+    </para>
+</section>
+<section xml:id="policy">
+    <title>Policy</title>
+    <para>
+      The Policy service provides a rule-based authorization engine and
+      the associated rule management interface.
+    </para>
+</section>
+</section>
+<section xml:id="application-construction">
+  <title>Application Construction</title>
+  <para>
+    Keystone is an HTTP front-end to several services. Like other
+    OpenStack applications, this is done using python WSGI interfaces
+    and applications are configured together using
+    <link xlink:href="http://pythonpaste.org/">Paste</link>. The
+    application's HTTP endpoints are made up of pipelines of WSGI
+    middleware, such as:
+  </para>
+  <programlisting>
+[pipeline:public_api]
+pipeline = token_auth admin_token_auth json_body debug ec2_extension public_service
+</programlisting>
+  <para>
+    These in turn use a subclass of keystone.common.wsgi.ComposingRouter
+    to link URLs to Controllers (a subclass of
+    keystone.common.wsgi.Application). Within each Controller, one or
+    more Managers are loaded (for example, see
+    keystone.catalog.core.Manager), which are thin wrapper classes which
+    load the appropriate service driver based on the keystone
+    configuration.
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Identity
+      </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          keystone.identity.core.TenantController
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          keystone.identity.core.UserController
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          keystone.identity.core.RoleController
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Catalog
+      </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          keystone.catalog.core.ServiceController
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          keystone.service.VersionController
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Token
+      </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          keystone.service.TokenController
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Misc
+      </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          keystone.service.ExtensionsController
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <para>
+    At this time, the policy service and associated manager is not
+    exposed as a URL frontend, and has no associated Controller class.
+  </para>
+</section>
+<section xml:id="service-backends">
+  <title>Service Backends</title>
+  <para>
+    Each of the services can configured to use a backend to allow
+    Keystone to fit a variety of environments and needs. The backend for
+    each service is defined in the keystone.conf file with the key
+    <literal>driver</literal> under a group associated with each
+    service.
+  </para>
+  <para>
+    A general class under each backend named <literal>Driver</literal>
+    exists to provide an abstract base class for any implementations,
+    identifying the expected service implementations. The drivers for
+    the services are:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        keystone.identity.core.Driver
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        keystone.token.core.Driver
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    If you implement a backend driver for one of the keystone services,
+    you're expected to subclass from these classes. The default response
+    for the defined apis in these Drivers is to raise a
+    keystone.service.TokenController.
+  </para>
+<section xml:id="sql-backend">
+    <title>SQL Backend</title>
+    <para>
+      A SQL based backend using SQLAlchemy to store data persistently.
+      The keystone-manage command introspects the backends to identify
+      SQL based backends when running &quot;db_sync&quot; to establish
+      or upgrade schema. If the backend driver has a method db_sync(),
+      it will be invoked to sync and/or migrate schema.
+    </para>
+</section>
+<section xml:id="pam-backend">
+    <title>PAM Backend</title>
+    <para>
+      Extra simple backend that uses the current system's PAM service to
+      authenticate, providing a one-to-one relationship between Users
+      and Tenants with the root User also having the 'admin' role.
+    </para>
+</section>
+<section xml:id="templated-backend">
+    <title>Templated Backend</title>
+    <para>
+      Largely designed for a common use case around service catalogs in
+      the Keystone project, a Catalog backend that simply expands
+      pre-configured templates to provide catalog data.
+    </para>
+    <para>
+      Example paste.deploy config (uses $ instead of % to avoid
+      ConfigParser's interpolation):
+    </para>
+    <programlisting>
+[DEFAULT]
+catalog.RegionOne.identity.publicURL = http://localhost:$(public_port)s/v2.0
+catalog.RegionOne.identity.adminURL = http://localhost:$(public_port)s/v2.0
+catalog.RegionOne.identity.internalURL = http://localhost:$(public_port)s/v2.0
+catalog.RegionOne.identity.name = 'Identity Service'
+</programlisting>
+</section>
+<section xml:id="ldap-backend">
+    <title>LDAP Backend</title>
+    <para>
+      The LDAP backend stored Users and Tenants in separate Subtrees.
+      Roles are recorded as entries under the Tenants.
+    </para>
+</section>
+</section>
+<section xml:id="data-model">
+  <title>Data Model</title>
+  <para>
+    Keystone was designed from the ground up to be amenable to multiple
+    styles of backends and as such many of the methods and data types
+    will happily accept more data than they know what to do with and
+    pass them on to a backend.
+  </para>
+  <para>
+    There are a few main data types:
+  </para>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis role="strong">User</emphasis>: has account
+          credentials, is associated with one or more tenants
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Tenant</emphasis>: unit of ownership
+          in openstack, contains one or more users
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Role</emphasis>: a first-class piece
+          of metadata associated with many user-tenant pairs.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Token</emphasis>: identifying
+          credential associated with a user or user and tenant
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Extras</emphasis>: bucket of key-value
+          metadata associated with a user-tenant pair.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="strong">Rule</emphasis>: describes a set of
+          requirements for performing an action.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <para>
+    While the general data model allows a many-to-many relationship
+    between Users and Tenants and a many-to-one relationship between
+    Extras and User-Tenant pairs, the actual backend implementations
+    take varying levels of advantage of that functionality.
+  </para>
+</section>
+<section xml:id="approach-to-crud">
+  <title>Approach to CRUD</title>
+  <para>
+    While it is expected that any &quot;real&quot; deployment at a large
+    company will manage their users, tenants and other metadata in their
+    existing user systems, a variety of CRUD operations are provided for
+    the sake of development and testing.
+  </para>
+  <para>
+    CRUD is treated as an extension or additional feature to the core
+    feature set in that it is not required that a backend support it. It
+    is expected that backends for services that don't support the CRUD
+    operations will raise a keystone.exception.NotImplemented.
+  </para>
+</section>
+<section xml:id="approach-to-authorization-policy">
+  <title>Approach to Authorization (Policy)</title>
+  <para>
+    Various components in the system require that different actions are
+    allowed based on whether the user is authorized to perform that
+    action.
+  </para>
+  <para>
+    For the purposes of Keystone there are only a couple levels of
+    authorization being checked for:
+  </para>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Require that the performing user is considered an admin.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Require that the performing user matches the user being
+          referenced.
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+  <para>
+    Other systems wishing to use the policy engine will require
+    additional styles of checks and will possibly write completely
+    custom backends. Backends included in Keystone are:
+  </para>
+<section xml:id="rules">
+    <title>Rules</title>
+    <para>
+      Given a list of matches to check for, simply verify that the
+      credentials contain the matches. For example:
+    </para>
+    <programlisting>
+credentials = {'user_id': 'foo', 'is_admin': 1, 'roles': ['nova:netadmin']}
+
+# An admin only call:
+policy_api.enforce(('is_admin:1',), credentials)
+
+# An admin or owner call:
+policy_api.enforce(('is_admin:1', 'user_id:foo'), credentials)
+
+# A netadmin call:
+policy_api.enforce(('roles:nova:netadmin',), credentials)
+</programlisting>
+    <para>
+      Credentials are generally built from the user metadata in the
+      'extras' part of the Identity API. So, adding a 'role' to the user
+      just means adding the role to the user metadata.
+    </para>
+</section>
+<section xml:id="capability-rbac">
+    <title>Capability RBAC</title>
+    <para>
+      (Not yet implemented.)
+    </para>
+    <para>
+      Another approach to authorization can be action-based, with a
+      mapping of roles to which capabilities are allowed for that role.
+      For example:
+    </para>
+    <programlisting>
+credentials = {'user_id': 'foo', 'is_admin': 1, 'roles': ['nova:netadmin']}
+
+# add a policy
+policy_api.add_policy('action:nova:add_network', ('roles:nova:netadmin',))
+
+policy_api.enforce(('action:nova:add_network',), credentials)
+</programlisting>
+    <para>
+      In the backend this would look up the policy for
+      'action:nova:add_network' and then do what is effectively a
+      'Simple Match' style match against the creds.
+    </para>
+</section>
+</section>
+</section>

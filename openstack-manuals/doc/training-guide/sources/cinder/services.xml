@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Services,-Managers-and-Drivers">
+<title>Services, Managers and Drivers</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The responsibilities of Services, Managers, and Drivers, can be a bit
+  confusing to people that are new to cinder. This document attempts to
+  outline the division of responsibilities to make understanding the
+  system a little bit easier.
+</para>
+<para>
+  Currently, Managers and Drivers are specified by flags and loaded
+  using utils.load_object(). This method allows for them to be
+  implemented as singletons, classes, modules or objects. As long as the
+  path specified by the flag leads to an object (or a callable that
+  returns an object) that responds to getattr, it should work as a
+  manager or driver.
+</para>
+</section>
+<section xml:id="the-cinder.service-module">
+  <title>The cinder.service Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.manager-module">
+  <title>The cinder.manager Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="implementation-specific-drivers">
+  <title>Implementation-Specific Drivers</title>
+  <para>
+    A manager will generally load a driver for some of its tasks. The
+    driver is responsible for specific implementation details. Anything
+    running shell commands on a host, or dealing with other non-python
+    code should probably be happening in a driver.
+  </para>
+  <para>
+    Drivers should minimize touching the database, although it is
+    currently acceptable for implementation specific data. This may be
+    reconsidered at some point.
+  </para>
+  <para>
+    It usually makes sense to define an Abstract Base Class for the
+    specific driver (i.e. VolumeDriver), to define the methods that a
+    different driver would need to implement.
+  </para>
+</section>
+</section>

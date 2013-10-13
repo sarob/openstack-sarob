@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Continuous-Integration-with-Jenkins">
+<title>Continuous Integration with Jenkins</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Nova uses a <ulink url="http://jenkins-ci.org">Jenkins</ulink> server
+  to automate development tasks. The Jenkins front-end is at
+  <ulink url="http://jenkins.openstack.org">http://jenkins.openstack.org</ulink>.
+  You must have an account on
+  <ulink url="http://launchpad.net">Launchpad</ulink> to be able to
+  access the OpenStack Jenkins site.
+</para>
+<para>
+  Jenkins performs tasks such as running static code analysis, running
+  unit tests, and running functional tests. For more details on the jobs
+  being run by Jenkins, see the code reviews on
+  <ulink url="http://review.openstack.org">http://review.openstack.org</ulink>.
+  Tests are run automatically and comments are put on the reviews
+  automatically with the results.
+</para>
+<para>
+  You can also get a view of the jobs that are currently running from
+  the zuul status dashboard,
+  <ulink url="http://status.openstack.org/zuul/">http://status.openstack.org/zuul/</ulink>.
+</para>
+</article>
+</section>

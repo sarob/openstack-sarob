@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Frequently-Asked-Questions">
+<title>Frequently Asked Questions</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  What is the relationship between <literal>Dashboards</literal>,
+  <literal>Panels</literal>, and navigation?
+</para>
+<blockquote>
+  <para>
+    The navigational structure is strongly encouraged to flow from
+    <literal>Dashboard</literal> objects as top-level navigation items
+    to <literal>Panel</literal> objects as sub-navigation items as in
+    the current implementation. Template tags are provided to
+    automatically generate this structure.
+  </para>
+  <para>
+    That said, you are not required to use the provided tools and can
+    write templates and URLconfs by hand to create any desired
+    structure.
+  </para>
+</blockquote>
+<para>
+  Does a panel have to be an app in <literal>INSTALLED_APPS</literal>?
+</para>
+<blockquote>
+  <para>
+    A panel can live in any Python module. It can be a standalone which
+    ties into an existing dashboard, or it can be contained alongside
+    others within a larger dashboard &quot;app&quot;. There is no strict
+    enforcement here. Python is &quot;a language for consenting
+    adults.&quot; A module containing a Panel does not need to be added
+    to <literal>INSTALLED_APPS</literal>, but this is a common and
+    convenient way to load a standalone panel.
+  </para>
+</blockquote>
+<para>
+  Could I hook an external service into a panel using, for example, an
+  iFrame?
+</para>
+<blockquote>
+  <para>
+    Panels are just entry-points to hook views into the larger dashboard
+    navigational structure and enforce common attributes like RBAC. The
+    view and corresponding templates can contain anything you would
+    like, including iFrames.
+  </para>
+</blockquote>
+<para>
+  What does this mean for visual design?
+</para>
+<blockquote>
+  <para>
+    The ability to add an arbitrary number of top-level navigational
+    items (<literal>Dashboard</literal> objects) poses a new design
+    challenge. Horizon's lead designer has taken on the challenge of
+    providing a reference design for Horizon which supports this
+    possibility.
+  </para>
+</blockquote>
+</article>
+</section>

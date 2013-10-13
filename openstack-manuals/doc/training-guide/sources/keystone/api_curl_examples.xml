@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="">
+<title></title>
+<section xml:id="service-api-examples-using-curl">
+  <title>Service API Examples Using Curl</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    The service API is defined to be a subset of the Admin API and, by
+    default, runs on port 5000.
+  </para>
+</section>
+<section xml:id="get">
+    <title>GET /</title>
+    <para>
+      This call is identical to that documented for the Admin API,
+      except that it uses port 5000, instead of port 35357, by default:
+    </para>
+    <programlisting>
+$ curl http://0.0.0.0:5000
+</programlisting>
+    <para>
+      or:
+    </para>
+    <programlisting>
+$ curl http://0.0.0.0:5000/v2.0/
+</programlisting>
+    <para>
+      See the Admin API Examples Using Curl_ for more info.
+    </para>
+</section>
+<section xml:id="get-extensions">
+    <title>GET /extensions</title>
+    <para>
+      This call is identical to that documented for the Admin API.
+    </para>
+</section>
+<section xml:id="post-tokens">
+    <title>POST /tokens</title>
+    <para>
+      This call is identical to that documented for the Admin API.
+    </para>
+</section>
+<section xml:id="get-tenants">
+    <title>GET /tenants</title>
+    <para>
+      List all of the tenants your token can access:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:887665443383838&quot; http://localhost:5000/v2.0/tenants
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;tenants_links&quot;: [],
+    &quot;tenants&quot;: [
+        {
+            &quot;enabled&quot;: true,
+            &quot;description&quot;: &quot;None&quot;,
+            &quot;name&quot;: &quot;customer-x&quot;,
+            &quot;id&quot;: &quot;1&quot;
+        }
+    ]
+}
+</programlisting>
+</section>
+</section>
+<section xml:id="admin-api-examples-using-curl">
+  <title>Admin API Examples Using Curl</title>
+  <para>
+    These examples assume a default port value of 35357, and depend on
+    the <literal>sampledata</literal> bundled with keystone.
+  </para>
+<section xml:id="get-1">
+    <title>GET /</title>
+    <para>
+      Discover API version information, links to documentation (PDF,
+      HTML, WADL), and supported media types:
+    </para>
+    <programlisting>
+$ curl http://0.0.0.0:35357
+</programlisting>
+    <para>
+      or:
+    </para>
+    <programlisting>
+$ curl http://0.0.0.0:35357/v2.0/
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;version&quot;:{
+        &quot;id&quot;:&quot;v2.0&quot;,
+        &quot;status&quot;:&quot;beta&quot;,
+        &quot;updated&quot;:&quot;2011-11-19T00:00:00Z&quot;,
+        &quot;links&quot;:[
+            {
+                &quot;rel&quot;:&quot;self&quot;,
+                &quot;href&quot;:&quot;http://127.0.0.1:35357/v2.0/&quot;
+            },
+            {
+                &quot;rel&quot;:&quot;describedby&quot;,
+                &quot;type&quot;:&quot;text/html&quot;,
+                &quot;href&quot;:&quot;http://docs.openstack.org/api/openstack-identity-service/2.0/content/&quot;
+            },
+            {
+                &quot;rel&quot;:&quot;describedby&quot;,
+                &quot;type&quot;:&quot;application/pdf&quot;,
+                &quot;href&quot;:&quot;http://docs.openstack.org/api/openstack-identity-service/2.0/identity-dev-guide-2.0.pdf&quot;
+            },
+            {
+                &quot;rel&quot;:&quot;describedby&quot;,
+                &quot;type&quot;:&quot;application/vnd.sun.wadl+xml&quot;,
+                &quot;href&quot;:&quot;http://127.0.0.1:35357/v2.0/identity-admin.wadl&quot;
+            }
+        ],
+        &quot;media-types&quot;:[
+            {
+                &quot;base&quot;:&quot;application/xml&quot;,
+                &quot;type&quot;:&quot;application/vnd.openstack.identity-v2.0+xml&quot;
+            },
+            {
+                &quot;base&quot;:&quot;application/json&quot;,
+                &quot;type&quot;:&quot;application/vnd.openstack.identity-v2.0+json&quot;
+            }
+        ]
+    }
+}
+</programlisting>
+</section>
+<section xml:id="get-extensions-1">
+    <title>GET /extensions</title>
+    <para>
+      Discover the API extensions enabled at the endpoint:
+    </para>
+    <programlisting>
+$ curl http://0.0.0.0:35357/extensions
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;extensions&quot;:{
+        &quot;values&quot;:[]
+    }
+}
+</programlisting>
+</section>
+<section xml:id="post-tokens-1">
+    <title>POST /tokens</title>
+    <para>
+      Authenticate by exchanging credentials for an access token:
+    </para>
+    <programlisting>
+$ curl -d '{&quot;auth&quot;:{&quot;passwordCredentials&quot;:{&quot;username&quot;: &quot;joeuser&quot;, &quot;password&quot;: &quot;secrete&quot;}}}' -H &quot;Content-type: application/json&quot; http://localhost:35357/v2.0/tokens
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;access&quot;:{
+        &quot;token&quot;:{
+            &quot;expires&quot;:&quot;2012-02-05T00:00:00&quot;,
+            &quot;id&quot;:&quot;887665443383838&quot;,
+            &quot;tenant&quot;:{
+                &quot;id&quot;:&quot;1&quot;,
+                &quot;name&quot;:&quot;customer-x&quot;
+            }
+        },
+        &quot;serviceCatalog&quot;:[
+            {
+                &quot;endpoints&quot;:[
+                {
+                    &quot;adminURL&quot;:&quot;http://swift.admin-nets.local:8080/&quot;,
+                    &quot;region&quot;:&quot;RegionOne&quot;,
+                    &quot;internalURL&quot;:&quot;http://127.0.0.1:8080/v1/AUTH_1&quot;,
+                    &quot;publicURL&quot;:&quot;http://swift.publicinternets.com/v1/AUTH_1&quot;
+                }
+                ],
+                &quot;type&quot;:&quot;object-store&quot;,
+                &quot;name&quot;:&quot;swift&quot;
+            },
+            {
+                &quot;endpoints&quot;:[
+                {
+                    &quot;adminURL&quot;:&quot;http://cdn.admin-nets.local/v1.1/1&quot;,
+                    &quot;region&quot;:&quot;RegionOne&quot;,
+                    &quot;internalURL&quot;:&quot;http://127.0.0.1:7777/v1.1/1&quot;,
+                    &quot;publicURL&quot;:&quot;http://cdn.publicinternets.com/v1.1/1&quot;
+                }
+                ],
+                &quot;type&quot;:&quot;object-store&quot;,
+                &quot;name&quot;:&quot;cdn&quot;
+            }
+        ],
+        &quot;user&quot;:{
+            &quot;id&quot;:&quot;1&quot;,
+            &quot;roles&quot;:[
+                {
+                &quot;tenantId&quot;:&quot;1&quot;,
+                &quot;id&quot;:&quot;3&quot;,
+                &quot;name&quot;:&quot;Member&quot;
+                }
+            ],
+            &quot;name&quot;:&quot;joeuser&quot;
+        }
+    }
+}
+</programlisting>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        Take note of the value ['access']['token']['id'] value produced
+        here (<literal>887665443383838</literal>, above), as you can use
+        it in the calls below.
+      </para>
+    </blockquote>
+</section>
+<section xml:id">
+    <title>GET /tokens/{token_id}</title>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        This call refers to a token known to be valid,
+        <literal>887665443383838</literal> in this case.
+      </para>
+    </blockquote>
+    <para>
+      Validate a token:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tokens/887665443383838
+</programlisting>
+    <para>
+      If the token is valid, returns:
+    </para>
+    <programlisting>
+{
+    &quot;access&quot;:{
+        &quot;token&quot;:{
+            &quot;expires&quot;:&quot;2012-02-05T00:00:00&quot;,
+            &quot;id&quot;:&quot;887665443383838&quot;,
+            &quot;tenant&quot;:{
+                &quot;id&quot;:&quot;1&quot;,
+                &quot;name&quot;:&quot;customer-x&quot;
+            }
+        },
+        &quot;user&quot;:{
+            &quot;name&quot;:&quot;joeuser&quot;,
+            &quot;tenantName&quot;:&quot;customer-x&quot;,
+            &quot;id&quot;:&quot;1&quot;,
+            &quot;roles&quot;:[
+                {
+                    &quot;serviceId&quot;:&quot;1&quot;,
+                    &quot;id&quot;:&quot;3&quot;,
+                    &quot;name&quot;:&quot;Member&quot;
+                }
+            ],
+            &quot;tenantId&quot;:&quot;1&quot;
+        }
+    }
+}
+</programlisting>
+</section>
+<section xml:id">
+    <title>HEAD /tokens/{token_id}</title>
+    <para>
+      This is a high-performance variant of the GET call documented
+      above, which by definition, returns no response body:
+    </para>
+    <programlisting>
+$ curl -I -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tokens/887665443383838
+</programlisting>
+    <para>
+      ... which returns <literal>200</literal>, indicating the token is
+      valid:
+    </para>
+    <programlisting>
+HTTP/1.1 200 OK
+Content-Length: 0
+Content-Type: None
+Date: Tue, 08 Nov 2011 23:07:44 GMT
+</programlisting>
+</section>
+<section xml:idendpoints">
+    <title>GET /tokens/{token_id}/endpoints</title>
+    <para>
+      List all endpoints for a token:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tokens/887665443383838/endpoints
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;endpoints_links&quot;: [
+        {
+            &quot;href&quot;: &quot;http://127.0.0.1:35357/tokens/887665443383838/endpoints?'marker=5&amp;limit=10'&quot;,
+            &quot;rel&quot;: &quot;next&quot;
+        }
+    ],
+    &quot;endpoints&quot;: [
+        {
+            &quot;internalURL&quot;: &quot;http://127.0.0.1:8080/v1/AUTH_1&quot;,
+            &quot;name&quot;: &quot;swift&quot;,
+            &quot;adminURL&quot;: &quot;http://swift.admin-nets.local:8080/&quot;,
+            &quot;region&quot;: &quot;RegionOne&quot;,
+            &quot;tenantId&quot;: 1,
+            &quot;type&quot;: &quot;object-store&quot;,
+            &quot;id&quot;: 1,
+            &quot;publicURL&quot;: &quot;http://swift.publicinternets.com/v1/AUTH_1&quot;
+        },
+        {
+            &quot;internalURL&quot;: &quot;http://localhost:8774/v1.0&quot;,
+            &quot;name&quot;: &quot;nova_compat&quot;,
+            &quot;adminURL&quot;: &quot;http://127.0.0.1:8774/v1.0&quot;,
+            &quot;region&quot;: &quot;RegionOne&quot;,
+            &quot;tenantId&quot;: 1,
+            &quot;type&quot;: &quot;compute&quot;,
+            &quot;id&quot;: 2,
+            &quot;publicURL&quot;: &quot;http://nova.publicinternets.com/v1.0/&quot;
+        },
+        {
+            &quot;internalURL&quot;: &quot;http://localhost:8774/v1.1&quot;,
+            &quot;name&quot;: &quot;nova&quot;,
+            &quot;adminURL&quot;: &quot;http://127.0.0.1:8774/v1.1&quot;,
+            &quot;region&quot;: &quot;RegionOne&quot;,
+            &quot;tenantId&quot;: 1,
+            &quot;type&quot;: &quot;compute&quot;,
+            &quot;id&quot;: 3,
+            &quot;publicURL&quot;: &quot;http://nova.publicinternets.com/v1.1/
+        },
+        {
+            &quot;internalURL&quot;: &quot;http://127.0.0.1:9292/v1.1/&quot;,
+            &quot;name&quot;: &quot;glance&quot;,
+            &quot;adminURL&quot;: &quot;http://nova.admin-nets.local/v1.1/&quot;,
+            &quot;region&quot;: &quot;RegionOne&quot;,
+            &quot;tenantId&quot;: 1,
+            &quot;type&quot;: &quot;image&quot;,
+            &quot;id&quot;: 4,
+            &quot;publicURL&quot;: &quot;http://glance.publicinternets.com/v1.1/&quot;
+        },
+        {
+            &quot;internalURL&quot;: &quot;http://127.0.0.1:7777/v1.1/1&quot;,
+            &quot;name&quot;: &quot;cdn&quot;,
+            &quot;adminURL&quot;: &quot;http://cdn.admin-nets.local/v1.1/1&quot;,
+            &quot;region&quot;: &quot;RegionOne&quot;,
+            &quot;tenantId&quot;: 1,
+            &quot;versionId&quot;: &quot;1.1&quot;,
+            &quot;versionList&quot;: &quot;http://127.0.0.1:7777/&quot;,
+            &quot;versionInfo&quot;: &quot;http://127.0.0.1:7777/v1.1&quot;,
+            &quot;type&quot;: &quot;object-store&quot;,
+            &quot;id&quot;: 5,
+            &quot;publicURL&quot;: &quot;http://cdn.publicinternets.com/v1.1/1&quot;
+        }
+    ]
+}
+</programlisting>
+</section>
+<section xml:id="get-tenants-1">
+    <title>GET /tenants</title>
+    <para>
+      List all of the tenants in the system (requires an Admin
+      <literal>X-Auth-Token</literal>):
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tenants
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;tenants_links&quot;: [],
+    &quot;tenants&quot;: [
+        {
+            &quot;enabled&quot;: false,
+            &quot;description&quot;: &quot;None&quot;,
+            &quot;name&quot;: &quot;project-y&quot;,
+            &quot;id&quot;: &quot;3&quot;
+        },
+        {
+            &quot;enabled&quot;: true,
+            &quot;description&quot;: &quot;None&quot;,
+            &quot;name&quot;: &quot;ANOTHER:TENANT&quot;,
+            &quot;id&quot;: &quot;2&quot;
+        },
+        {
+            &quot;enabled&quot;: true,
+            &quot;description&quot;: &quot;None&quot;,
+            &quot;name&quot;: &quot;customer-x&quot;,
+            &quot;id&quot;: &quot;1&quot;
+        }
+    ]
+}
+</programlisting>
+</section>
+<section xml:id">
+    <title>GET /tenants/{tenant_id}</title>
+    <para>
+      Retrieve information about a tenant, by tenant ID:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tenants/1
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;tenant&quot;:{
+        &quot;enabled&quot;:true,
+        &quot;description&quot;:&quot;None&quot;,
+        &quot;name&quot;:&quot;customer-x&quot;,
+        &quot;id&quot;:&quot;1&quot;
+    }
+}
+</programlisting>
+</section>
+<section xml:idroles">
+    <title>GET /tenants/{tenant_id}/users/{user_id}/roles</title>
+    <para>
+      List the roles a user has been granted on a tenant:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/tenants/1/users/1/roles
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;roles_links&quot;:[],
+    &quot;roles&quot;:[
+        {
+            &quot;id&quot;:&quot;3&quot;,
+            &quot;name&quot;:&quot;Member&quot;
+        }
+    ]
+}
+</programlisting>
+</section>
+<section xml:id">
+    <title>GET /users/{user_id}</title>
+    <para>
+      Retrieve information about a user, by user ID:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/users/1
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;user&quot;:{
+        &quot;tenantId&quot;:&quot;1&quot;,
+        &quot;enabled&quot;:true,
+        &quot;id&quot;:&quot;1&quot;,
+        &quot;name&quot;:&quot;joeuser&quot;
+    }
+}
+</programlisting>
+</section>
+<section xml:idroles">
+    <title>GET /users/{user_id}/roles</title>
+    <para>
+      Retrieve the roles granted to a user, given a user ID:
+    </para>
+    <programlisting>
+$ curl -H &quot;X-Auth-Token:999888777666&quot; http://localhost:35357/v2.0/users/4/roles
+</programlisting>
+    <para>
+      Returns:
+    </para>
+    <programlisting>
+{
+    &quot;roles_links&quot;:[],
+    &quot;roles&quot;:[
+        {
+            &quot;id&quot;:&quot;2&quot;,
+            &quot;name&quot;:&quot;KeystoneServiceAdmin&quot;
+        }
+    ]
+}
+</programlisting>
+</section>
+</section>
+</section>

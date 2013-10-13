@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Database-Management">
+<title>Database Management</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The default metadata driver for glance uses sqlalchemy, which implies
+  there exists a backend database which must be managed. The
+  <literal>glance-manage</literal> binary provides a set of commands for
+  making this easier.
+</para>
+</section>
+<section xml:id="initializing-an-empty-database">
+  <title>Initializing an Empty Database</title>
+  <blockquote>
+    <para>
+      glance-manage db_sync
+    </para>
+  </blockquote>
+  <para>
+    This will take an empty database and create the necessary tables.
+  </para>
+</section>
+<section xml:id="determining-the-database-version">
+  <title>Determining the Database Version</title>
+  <blockquote>
+    <para>
+      glance-manage db_version
+    </para>
+  </blockquote>
+  <para>
+    This will print the version of a glance database.
+  </para>
+</section>
+<section xml:id="upgrading-an-existing-database">
+  <title>Upgrading an Existing Database</title>
+  <blockquote>
+    <para>
+      glance-manage db_sync &lt;VERSION&gt;
+    </para>
+  </blockquote>
+  <para>
+    This will take an existing database and upgrade it to the specified
+    VERSION.
+  </para>
+</section>
+<section xml:id="downgrading-an-existing-database">
+  <title>Downgrading an Existing Database</title>
+  <blockquote>
+    <para>
+      glance-manage downgrade &lt;VERSION&gt;
+    </para>
+  </blockquote>
+  <para>
+    This will downgrade an existing database from the current version to
+    the specified VERSION.
+  </para>
+</section>
+</section>

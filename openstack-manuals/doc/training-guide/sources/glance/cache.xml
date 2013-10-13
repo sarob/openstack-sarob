@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="The-Glance-Image-Cache">
+<title>The Glance Image Cache</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The Glance API server may be configured to have an optional local
+  image cache. A local image cache stores a copy of image files,
+  essentially enabling multiple API servers to serve the same image
+  file, resulting in an increase in scalability due to an increased
+  number of endpoints serving an image file.
+</para>
+<para>
+  This local image cache is transparent to the end user -- in other
+  words, the end user doesn't know that the Glance API is streaming an
+  image file from its local cache or from the actual backend storage
+  system.
+</para>
+</section>
+<section xml:id="managing-the-glance-image-cache">
+  <title>Managing the Glance Image Cache</title>
+  <para>
+    While image files are automatically placed in the image cache on
+    successful requests to
+    <literal>GET /images/&lt;IMAGE_ID&gt;</literal>, the image cache is
+    not automatically managed. Here, we describe the basics of how to
+    manage the local image cache on Glance API servers and how to
+    automate this cache management.
+  </para>
+<section xml:id="controlling-the-growth-of-the-image-cache">
+    <title>Controlling the Growth of the Image Cache</title>
+    <para>
+      The image cache has a configurable maximum size (the
+      <literal>image_cache_max_size</literal> configuration file option.
+      However, when images are succesfully returned from a call to
+      <literal>GET /images/&lt;IMAGE_ID&gt;</literal>, the image cache
+      automatically writes the image file to its cache, regardless of
+      whether the resulting write would make the image cache's size
+      exceed the value of <literal>image_cache_max_size</literal>. In
+      order to keep the image cache at or below this maximum cache size,
+      you need to run the <literal>glance-cache-pruner</literal>
+      executable.
+    </para>
+    <para>
+      The recommended practice is to use <literal>cron</literal> to fire
+      <literal>glance-cache-pruner</literal> at a regular interval.
+    </para>
+</section>
+<section xml:id="cleaning-the-image-cache">
+    <title>Cleaning the Image Cache</title>
+    <para>
+      Over time, the image cache can accumulate image files that are
+      either in a stalled or invalid state. Stalled image files are the
+      result of an image cache write failing to complete. Invalid image
+      files are the result of an image file not being written properly
+      to disk.
+    </para>
+    <para>
+      To remove these types of files, you run the
+      <literal>glance-cache-cleaner</literal> executable.
+    </para>
+    <para>
+      The recommended practice is to use <literal>cron</literal> to fire
+      <literal>glance-cache-cleaner</literal> at a semi-regular
+      interval.
+    </para>
+</section>
+<section xml:id="prefetching-images-into-the-image-cache">
+    <title>Prefetching Images into the Image Cache</title>
+    <para>
+      Some installations have base (sometimes called &quot;golden&quot;)
+      images that are very commonly used to boot virtual machines. When
+      spinning up a new API server, administrators may wish to prefetch
+      these image files into the local image cache to ensure that reads
+      of those popular image files come from a local cache.
+    </para>
+    <para>
+      To queue an image for prefetching, you can use one of the
+      following methods:
+    </para>
+    <blockquote>
+      <itemizedlist>
+        <listitem>
+          <para>
+            If the <literal>cache_manage</literal> middleware is enabled
+            in the application pipeline, you may call
+            <literal>PUT /queued-images/&lt;IMAGE_ID&gt;</literal> to
+            queue the image with identifier
+            <literal>&lt;IMAGE_ID&gt;</literal>
+          </para>
+          <para>
+            Alternately, you can use the
+            <literal>glance-cache-manage</literal> program to queue the
+            image. This program may be run from a different host than
+            the host containing the image cache. Example usage:
+          </para>
+          <programlisting>
+$&gt; glance-cache-manage --host=&lt;HOST&gt; queue-image &lt;IMAGE_ID&gt;
+</programlisting>
+          <para>
+            This will queue the image with identifier
+            <literal>&lt;IMAGE_ID&gt;</literal> for prefetching
+          </para>
+        </listitem>
+      </itemizedlist>
+    </blockquote>
+    <para>
+      Once you have queued the images you wish to prefetch, call the
+      <literal>glance-cache-prefetcher</literal> executable, which will
+      prefetch all queued images concurrently, logging the results of
+      the fetch for each image.
+    </para>
+</section>
+<section xml:id="finding-which-images-are-in-the-image-cache">
+    <title>Finding Which Images are in the Image Cache</title>
+    <para>
+      You can find out which images are in the image cache using one of
+      the following methods:
+    </para>
+    <blockquote>
+      <itemizedlist>
+        <listitem>
+          <para>
+            If the <literal>cachemanage</literal> middleware is enabled
+            in the application pipeline, you may call
+            <literal>GET /cached-images</literal> to see a
+            JSON-serialized list of mappings that show cached images,
+            the number of cache hits on each image, the size of the
+            image, and the times they were last accessed.
+          </para>
+          <para>
+            Alternately, you can use the
+            <literal>glance-cache-manage</literal> program. This program
+            may be run from a different host than the host containing
+            the image cache. Example usage:
+          </para>
+          <para>
+            $&gt; glance-cache-manage --host=&lt;HOST&gt; list-cached
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            You can issue the following call on *nix systems (on the
+            host that contains the image cache):
+          </para>
+          <programlisting>
+$&gt; ls -lhR $IMAGE_CACHE_DIR
+</programlisting>
+          <para>
+            where <literal>$IMAGE_CACHE_DIR</literal> is the value of
+            the <literal>image_cache_dir</literal> configuration
+            variable.
+          </para>
+          <para>
+            Note that the image's cache hit is not shown using this
+            method.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </blockquote>
+</section>
+<section xml:id="manually-removing-images-from-the-image-cache">
+    <title>Manually Removing Images from the Image Cache</title>
+    <para>
+      If the <literal>cachemanage</literal> middleware is enabled, you
+      may call <literal>DELETE /cached-images/&lt;IMAGE_ID&gt;</literal>
+      to remove the image file for image with identifier
+      <literal>&lt;IMAGE_ID&gt;</literal> from the cache.
+    </para>
+    <para>
+      Alternately, you can use the
+      <literal>glance-cache-manage</literal> program. Example usage:
+    </para>
+    <programlisting>
+$&gt; glance-cache-manage --host=&lt;HOST&gt; delete-cached-image &lt;IMAGE_ID&gt;
+</programlisting>
+</section>
+</section>
+</section>

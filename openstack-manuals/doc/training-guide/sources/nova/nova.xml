@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Common-and-Misc-Libraries">
+<title>Common and Misc Libraries</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Libraries common throughout Nova or just ones that haven't been
+  categorized very well yet.
+</para>
+</section>
+<section xml:id="the-nova.adminclient-module">
+  <title>The nova.adminclient Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.context-module">
+  <title>The nova.context Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.exception-module">
+  <title>The nova.exception Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.flags-module">
+  <title>The nova.flags Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.process-module">
+  <title>The nova.process Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.rpc-module">
+  <title>The nova.rpc Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.server-module">
+  <title>The nova.server Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.test-module">
+  <title>The nova.test Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.utils-module">
+  <title>The nova.utils Module</title>
+  <para>
+  </para>
+</section>
+<section xml:idate-module">
+  <title>The nova.validate Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.wsgi-module">
+  <title>The nova.wsgi Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-declare_flags-module">
+    <title>The declare_flags Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-fake_flags-module">
+    <title>The fake_flags Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-flags_unittest-module">
+    <title>The flags_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-process_unittest-module">
+    <title>The process_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-real_flags-module">
+    <title>The real_flags Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-rpc_unittest-module">
+    <title>The rpc_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-runtime_flags-module">
+    <title>The runtime_flags Module</title>
+    <para>
+    </para>
+</section>
+<section xml:idator_unittest-module">
+    <title>The validator_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

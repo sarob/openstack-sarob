@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="The-Auth-System">
+<title>The Auth System</title>
+<section xml:id="tempauth">
+  <title>TempAuth</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    The auth system for Swift is loosely based on the auth system from
+    the existing Rackspace architecture -- actually from a few existing
+    auth systems -- and is therefore a bit disjointed. The distilled
+    points about it are:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        The authentication/authorization part can be an external system
+        or a subsystem run within Swift as WSGI middleware
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The user of Swift passes in an auth token with each request
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Swift validates each token with the external auth system or auth
+        subsystem and caches the result
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The token does not change from request to request, but does
+        expire
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    The token can be passed into Swift using the X-Auth-Token or the
+    X-Storage-Token header. Both have the same format: just a simple
+    string representing the token. Some auth systems use UUID tokens,
+    some an MD5 hash of something unique, some use &quot;something
+    else&quot; but the salient point is that the token is a string which
+    can be sent as-is back to the auth system for validation.
+  </para>
+  <para>
+    Swift will make calls to the auth system, giving the auth token to
+    be validated. For a valid token, the auth system responds with an
+    overall expiration in seconds from now. Swift will cache the token
+    up to the expiration time.
+  </para>
+  <para>
+    The included TempAuth also has the concept of admin and non-admin
+    users within an account. Admin users can do anything within the
+    account. Non-admin users can only perform operations per container
+    based on the container's X-Container-Read and X-Container-Write
+    ACLs. For more information on ACLs, see swift.common.middleware.acl.
+  </para>
+  <para>
+    Additionally, if the auth system sets the request environ's
+    swift_owner key to True, the proxy will return additional header
+    information in some requests, such as the X-Container-Sync-Key for a
+    container GET or HEAD.
+  </para>
+  <para>
+    Users with the special group <literal>.reseller_admin</literal> can
+    operate on any account. For an example usage please see
+    swift.common.middleware.tempauth. If a request is coming from a
+    reseller the auth system sets the request environ reseller_request
+    to True. This can be used by other middlewares.
+  </para>
+  <para>
+    TempAuth will now allow OPTIONS requests to go through without a
+    token.
+  </para>
+  <para>
+    The user starts a session by sending a ReST request to the auth
+    system to receive the auth token and a URL to the Swift system.
+  </para>
+</sect1>
+</section>
+<section xml:id="keystone-auth">
+  <title>Keystone Auth</title>
+  <para>
+    Swift is able to authenticate against OpenStack keystone via the
+    swift.common.middleware.keystoneauth middleware.
+  </para>
+  <para>
+    In order to use the <literal>keystoneauth</literal> middleware the
+    <literal>authtoken</literal> middleware from python-keystoneclient
+    will need to be configured.
+  </para>
+  <para>
+    The <literal>authtoken</literal> middleware performs the
+    authentication token validation and retrieves actual user
+    authentication information. It can be found in the
+    python-keystoneclient distribution.
+  </para>
+  <para>
+    The <literal>keystoneauth</literal> middleware performs
+    authorization and mapping the <literal>keystone</literal> roles to
+    Swift's ACLs.
+  </para>
+<section xml:id="configuring-swift-to-use-keystone">
+    <title>Configuring Swift to use Keystone</title>
+    <para>
+      Configuring Swift to use Keystone is relatively straight forward.
+      The first step is to ensure that you have the auth_token
+      middleware installed, distributed with keystone it can either be
+      dropped in your python path or installed via the keystone package.
+    </para>
+    <para>
+      You need at first make sure you have a service endpoint of type
+      <literal>object-store</literal> in keystone pointing to your Swift
+      proxy. For example having this in your
+      <literal>/etc/keystone/default_catalog.templates</literal> :
+    </para>
+    <programlisting>
+catalog.RegionOne.object_store.name = Swift Service
+catalog.RegionOne.object_store.publicURL = http://swiftproxy:8080/v1/AUTH_$(tenant_id)s
+catalog.RegionOne.object_store.adminURL = http://swiftproxy:8080/
+catalog.RegionOne.object_store.internalURL = http://swiftproxy:8080/v1/AUTH_$(tenant_id)s
+</programlisting>
+    <para>
+      On your Swift Proxy server you will want to adjust your main
+      pipeline and add auth_token and keystoneauth in your
+      <literal>/etc/swift/proxy-server.conf</literal> like this :
+    </para>
+    <programlisting>
+[pipeline:main]
+pipeline = [....] authtoken keystoneauth proxy-logging proxy-server
+</programlisting>
+    <para>
+      add the configuration for the authtoken middleware:
+    </para>
+    <programlisting>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = keystonehost
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://keystonehost:5000/
+admin_tenant_name = service
+admin_user = swift
+admin_password = password
+cache = swift.cache
+</programlisting>
+    <para>
+      The actual values for these variables will need to be set
+      depending on your situation. For more information, please refer to
+      the Keystone documentation on the <literal>auth_token</literal>
+      middleware, but in short:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Those variables beginning with <literal>auth_</literal> point
+          to the Keystone Admin service. This information is used by the
+          middleware to actually query Keystone about the validity of
+          the authentication tokens.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The admin auth credentials (<literal>admin_user</literal>,
+          <literal>admin_tenant_name</literal>,
+          <literal>admin_password</literal>) will be used to retrieve an
+          admin token. That token will be used to authorize user tokens
+          behind the scenes.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        If support is required for unvalidated users (as with anonymous
+        access) or for tempurl/formpost middleware, authtoken will need
+        to be configured with delay_auth_decision set to 1.
+      </para>
+    </blockquote>
+    <para>
+      and you can finally add the keystoneauth configuration:
+    </para>
+    <programlisting>
+[filter:keystoneauth]
+use = egg:swift#keystoneauth
+operator_roles = admin, swiftoperator
+</programlisting>
+    <para>
+      By default the only users able to give ACL or to Create other
+      containers are the ones who has the Keystone role specified in the
+      <literal>operator_roles</literal> setting.
+    </para>
+    <para>
+      This user who have one of those role will be able to give ACLs to
+      other users on containers, see the documentation on ACL here
+      swift.common.middleware.acl.
+    </para>
+    <para>
+      Users with the Keystone role defined in
+      <literal>reseller_admin_role</literal>
+      (<literal>ResellerAdmin</literal> by default) can operate on any
+      account. The auth system sets the request environ reseller_request
+      to True if a request is coming from an user with this role. This
+      can be used by other middlewares.
+    </para>
+</section>
+</section>
+<section xml:id="extending-auth">
+  <title>Extending Auth</title>
+  <para>
+    TempAuth is written as wsgi middleware, so implementing your own
+    auth is as easy as writing new wsgi middleware, and plugging it in
+    to the proxy server. The KeyStone project and the Swauth project are
+    examples of additional auth services.
+  </para>
+  <para>
+    Also, see development_auth.
+  </para>
+</section>
+</section>

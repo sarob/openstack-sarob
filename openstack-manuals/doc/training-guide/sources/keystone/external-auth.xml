@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Using-external-authentication-with-Keystone">
+<title>Using external authentication with Keystone</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  When Keystone is executed in HTTPD &lt;apache-httpd&gt; it is possible
+  to use external authentication methods different from the
+  authentication provided by the identity store backend. For example,
+  this makes possible to use a SQL identity backend together with X.509
+  authentication, Kerberos, etc. instead of using the username/password
+  combination.
+</para>
+</section>
+<section xml:id="using-httpd-authentication">
+  <title>Using HTTPD authentication</title>
+  <para>
+    Webservers like Apache HTTP support many methods of authentication.
+    Keystone can profit from this feature and let the authentication be
+    done in the webserver, that will pass down the authenticated user to
+    Keystone using the <literal>REMOTE_USER</literal> environment
+    variable. This user must exist in advance in the identity backend so
+    as to get a token from the controller.
+  </para>
+  <para>
+    To use this method, Keystone should be running on
+    HTTPD &lt;apache-httpd&gt;.
+  </para>
+<section xml:id="x.509-example">
+    <title>X.509 example</title>
+    <para>
+      The following snippet for the Apache conf will authenticate the
+      user based on a valid X.509 certificate from a known CA:
+    </para>
+    <programlisting>
+&lt;VirtualHost _default_:5000&gt;
+    SSLEngine on
+    SSLCertificateFile    /etc/ssl/certs/ssl.cert
+    SSLCertificateKeyFile /etc/ssl/private/ssl.key
+
+    SSLCACertificatePath /etc/ssl/allowed_cas
+    SSLCARevocationPath  /etc/ssl/allowed_cas
+    SSLUserName          SSL_CLIENT_S_DN_CN
+    SSLVerifyClient      require
+    SSLVerifyDepth       10
+
+    (...)
+&lt;/VirtualHost&gt;
+</programlisting>
+</section>
+</section>
+<section xml:iddleware-for-authentication">
+  <title>Developing a WSGI middleware for authentication</title>
+  <para>
+    In addition to the method described above, it is possible to
+    implement other custom authentication mechanisms using the
+    <literal>REMOTE_USER</literal> WSGI environment variable.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">attention</emphasis>
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          Please note that even if it is possible to develop a custom
+          authentication
+        </term>
+        <listitem>
+          <para>
+            module, it is preferable to use the modules in the HTTPD
+            server. Such authentication modules in webservers like
+            Apache have normally undergone years of development and use
+            in production systems and are actively maintained upstream.
+            Developing a custom authentication module that implements
+            the same authentication as an existing Apache module likely
+            introduces a higher security risk.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+  <para>
+    If you find you must implement a custom authentication mechanism,
+    you will need to develop a custom WSGI middleware pipeline
+    component. This middleware should set the environment variable
+    <literal>REMOTE_USER</literal> to the authenticated username.
+    Keystone then will assume that the user has been already
+    authenticated upstream and will not try to authenticate it. However,
+    as with HTTPD authentication, the user must exist in advance in the
+    identity backend so that a proper token can be issued.
+  </para>
+  <para>
+    Your code should set the <literal>REMOTE_USER</literal> if the user
+    is properly authenticated, following the semantics below:
+  </para>
+  <programlisting>
+from keystone.common import wsgi
+
+class MyMiddlewareAuth(wsgi.Middleware):
+    def __init__(self, *args, **kwargs):
+        super(MyMiddlewareAuth, self).__init__(*args, **kwargs)
+
+    def process_request(self, request):
+        if request.environ.get('REMOTE_USER', None) is not None:
+            # Assume that it is authenticated upstream
+            return self.application
+
+        if not self.is_auth_applicable(request):
+            # Not applicable
+            return self.application
+
+        username = self.do_auth(request):
+        if username is not None:
+            # User is authenticated
+            request.environ['REMOTE_USER'] = username
+        else:
+            # User is not authenticated, render exception
+            raise exception.Unauthorized(&quot;Invalid user&quot;)
+</programlisting>
+<section xml:id="pipeline-configuration">
+    <title>Pipeline configuration</title>
+    <para>
+      Once you have your WSGI middleware component developed you have to
+      add it to your pipeline. The first step is to add the middleware
+      to your configuration file. Assuming that your middleware module
+      is <literal>keystone.middleware.MyMiddlewareAuth</literal>, you
+      can configure it in your <literal>keystone-paste.ini</literal> as:
+    </para>
+    <programlisting>
+[filter:my_auth]
+paste.filter_factory = keystone.middleware.MyMiddlewareAuth.factory
+</programlisting>
+    <para>
+      The second step is to add your middleware to the pipeline. The
+      exact place where you should place it will depend on your code
+      (i.e. if you need for example that the request body is converted
+      from JSON before perform the authentication you should place it
+      after the <literal>json_body</literal> filter) but it should be
+      set before the <literal>public_service</literal> (for the
+      <literal>public_api</literal> pipeline) or
+      <literal>admin_service</literal> (for the
+      <literal>admin_api</literal> pipeline), since they consume
+      authentication.
+    </para>
+    <para>
+      For example, if the original pipeline looks like this:
+    </para>
+    <programlisting>
+[pipeline:public_api]
+pipeline = stats_monitoring url_normalize token_auth admin_token_auth xml_body json_body debug ec2_extension user_crud_extension public_service
+</programlisting>
+    <para>
+      Your modified pipeline might then look like this:
+    </para>
+    <programlisting>
+[pipeline:public_api]
+pipeline = stats_monitoring url_normalize token_auth admin_token_auth xml_body json_body my_auth debug ec2_extension user_crud_extension public_service
+</programlisting>
+</section>
+</section>
+</section>

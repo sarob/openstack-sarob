@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Middleware-Architecture">
+<title>Middleware Architecture</title>
+<section xml:id="abstract">
+  <title>Abstract</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    The Keystone middleware architecture supports a common
+    authentication protocol in use between the OpenStack projects. By
+    using keystone as a common authentication and authorization
+    mechanisms, the OpenStack project can plug in to existing
+    authentication and authorization systems in use by existing
+    environments.
+  </para>
+  <para>
+    In this document, we describe the architecture and responsibilities
+    of the authentication middleware which acts as the internal API
+    mechanism for OpenStack projects based on the WSGI standard.
+  </para>
+  <para>
+    For the architecture of keystone and its services, please see
+    architecture. This documentation primarily describes the
+    implementation in
+    <literal>keystoneclient/middleware/auth_token.py</literal>
+    (:pykeystoneclient.middleware.auth_token.AuthProtocol)
+  </para>
+</sect1>
+</section>
+<section xml:id="specification-overview">
+  <title>Specification Overview</title>
+  <para>
+    'Authentication' is the process of determining that users are who
+    they say they are. Typically, 'authentication protocols' such as
+    HTTP Basic Auth, Digest Access, public key, token, etc, are used to
+    verify a user's identity. In this document, we define an
+    ''authentication component'' as a software module that implements an
+    authentication protocol for an OpenStack service. OpenStack is using
+    a token based mechanism to represent authentication and
+    authorization.
+  </para>
+  <para>
+    At a high level, an authentication middleware component is a proxy
+    that intercepts HTTP calls from clients and populates HTTP headers
+    in the request context for other WSGI middleware or applications to
+    use. The general flow of the middleware processing is:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        clear any existing authorization headers to prevent forgery
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        collect the token from the existing HTTP request headers
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        validate the token
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            if valid, populate additional headers representing the
+            identity that has been authenticated and authorized
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            in invalid, or not token present, reject the request
+            (HTTPUnauthorized) or pass along a header indicating the
+            request is unauthorized (configurable in the middleware)
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            if the keystone service is unavailable to validate the
+            token, reject the request with HTTPServiceUnavailable.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+  </itemizedlist>
+<section xml:id="authentication-component">
+    <title>Authentication Component</title>
+    <para>
+      Figure 1. Authentication Component
+    </para>
+    <para>
+      <inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/graphs_authComp.png" />
+        </imageobject>
+      </inlinemediaobject>
+    </para>
+    <para>
+      The middleware may also be configured to operated in a 'delegated
+      mode'. In this mode, the decision reject an unauthenticated client
+      is delegated to the OpenStack service, as illustrated below.
+    </para>
+    <para>
+      Here, requests are forwarded to the OpenStack service with an
+      identity status message that indicates whether the client's
+      identity has been confirmed or is indeterminate. It is the
+      OpenStack service that decides whether or not a reject message
+      should be sent to the client.
+    </para>
+</section>
+<section xml:id="authentication-component-delegated-mode">
+    <title>Authentication Component (Delegated Mode)</title>
+    <para>
+      Figure 2. Authentication Component (Delegated Mode)
+    </para>
+    <para>
+      <inlinemediaobject>
+        <imageobject>
+          <imagedata fileref="images/graphs_authCompDelegate.png" />
+        </imageobject>
+      </inlinemediaobject>
+    </para>
+</section>
+</section>
+<section xml:id="deployment-strategy">
+  <title>Deployment Strategy</title>
+  <para>
+    The middleware is intended to be used inline with OpenStack wsgi
+    components, based on the oslo WSGI middleware class. It is typically
+    deployed as a configuration element in a paste configuration
+    pipeline of other middleware components, with the pipeline
+    terminating in the service application. The middleware conforms to
+    the python WSGI standard [PEP-333]_. In initializing the middleware,
+    a configuration item (which acts like a python dictionary) is passed
+    to the middleware with relevant configuration options.
+  </para>
+<section xml:id="configuration">
+    <title>Configuration</title>
+    <para>
+      The middleware is configured within the config file of the main
+      application as a WSGI component. Example for the auth_token
+      middleware:
+    </para>
+    <programlisting>
+[app:myService]
+paste.app_factory = myService:app_factory
+
+[pipeline:main]
+pipeline = tokenauth myService
+
+[filter:tokenauth]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 127.0.0.1
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://127.0.0.1:5000/
+admin_token = Super999Sekret888Password777
+admin_user = admin
+admin_password = SuperSekretPassword
+admin_tenant_name = service
+;Uncomment next line and check ip:port to use memcached to cache tokens
+;memcache_servers = 127.0.0.1:11211
+;Uncomment next 2 lines if Keystone server is validating client cert
+certfile = &lt;path to middleware public cert&gt;
+keyfile = &lt;path to middleware private cert&gt;
+</programlisting>
+    <para>
+      For services which have separate paste-deploy ini file, auth_token
+      middleware can be alternatively configured in [keystone_authtoken]
+      section in the main config file. For example in Nova, all
+      middleware parameters can be removed from api-paste.ini:
+    </para>
+    <programlisting>
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+</programlisting>
+    <para>
+      and set in nova.conf:
+    </para>
+    <programlisting>
+[DEFAULT]
+...
+auth_strategy=keystone
+
+[keystone_authtoken]
+auth_host = 127.0.0.1
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://127.0.0.1:5000/
+admin_user = admin
+admin_password = SuperSekretPassword
+admin_tenant_name = service
+</programlisting>
+    <para>
+      Note that middleware parameters in paste config take priority,
+      they must be removed to use values in [keystone_authtoken]
+      section.
+    </para>
+</section>
+<section xml:id="configuration-options">
+    <title>Configuration Options</title>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>auth_host</literal>: (required) the host providing
+          the keystone service API endpoint for validating and
+          requesting tokens
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>admin_token</literal>: either this or the following
+          three options are required. If set, this is a single shared
+          secret with the keystone configuration used to validate
+          tokens.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>admin_user</literal>,
+          <literal>admin_password</literal>,
+          <literal>admin_tenant_name</literal>: if
+          <literal>admin_token</literal> is not set, or invalid, then
+          admin_user, admin_password, and admin_tenant_name are defined
+          as a service account which is expected to have been previously
+          configured in Keystone to validate user tokens.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>delay_auth_decision</literal>: (optional, default 0)
+          (off). If on, the middleware will not reject invalid auth
+          requests, but will delegate that decision to downstream WSGI
+          components.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>auth_port</literal>: (optional, default 35357) the
+          port used to validate tokens
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>auth_protocol</literal>: (optional, default https)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>auth_uri</literal>: (optional, defaults to
+          `auth_protocol`://`auth_host`:auth_port)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>certfile</literal>: (required, if Keystone server
+          requires client cert)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>keyfile</literal>: (required, if Keystone server
+          requires client cert) This can be the same as the certfile if
+          the certfile includes the private key.
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+<section xml:id="caching-for-improved-response">
+    <title>Caching for improved response</title>
+    <para>
+      In order to prevent every service request, the middleware may be
+      configured to utilize a cache, and the keystone API returns the
+      tokens with an expiration (configurable in duration on the
+      keystone service). The middleware supports memcache based caching.
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>memcache_servers</literal>: (optonal) if defined, the
+          memcache server(s) to use for cacheing
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>token_cache_time</literal>: (optional, default 300
+          seconds) Only valid if memcache_servers is defined.
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+</section>
+<section xml:id="exchanging-user-information">
+  <title>Exchanging User Information</title>
+  <para>
+    The middleware expects to find a token representing the user with
+    the header <literal>X-Auth-Token</literal> or
+    <literal>X-Storage-Token</literal>. X-Storage-Token is supported for
+    swift/cloud files and for legacy Rackspace use. If the token isn't
+    present and the middleware is configured to not delegate auth
+    responsibility, it will respond to the HTTP request with
+    HTTPUnauthorized, returning the header
+    <literal>WWW-Authenticate</literal> with the value
+    Keystone uri='...' to indicate where to request a token. The
+    auth_uri returned is configured with the middleware.
+  </para>
+  <para>
+    The authentication middleware extends the HTTP request with the
+    header <literal>X-Identity-Status</literal>. If a request is
+    successfully authenticated, the value is set to Confirmed. If the
+    middleware is delegating the auth decision to the service, then the
+    status is set to Invalid if the auth request was unsuccessful.
+  </para>
+<section xml:id="extended-the-request-with-additional-user-information">
+    <title>Extended the request with additional User Information</title>
+    <para>
+      The keystone client auth_token middleware extends the request with
+      additional information if the user has been authenticated.
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          X-Identity-Status
+        </term>
+        <listitem>
+          <para>
+            Provides information on whether the request was
+            authenticated or not.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-Tenant-Id
+        </term>
+        <listitem>
+          <para>
+            The unique, immutable tenant Id
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-Tenant-Name
+        </term>
+        <listitem>
+          <para>
+            The unique, but mutable (it can change) tenant name.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-User-Id
+        </term>
+        <listitem>
+          <para>
+            The user id of the user used to log in
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-User-Name
+        </term>
+        <listitem>
+          <para>
+            The username used to log in
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-Roles
+        </term>
+        <listitem>
+          <para>
+            The roles associated with that user
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+</section>
+<section xml:id="deprecated-additions">
+    <title>Deprecated additions</title>
+    <variablelist>
+      <varlistentry>
+        <term>
+          X-Tenant
+        </term>
+        <listitem>
+          <para>
+            Provides the tenant name. This is to support any legacy
+            implementations before Keystone switched to an ID/Name
+            schema for tenants.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-User
+        </term>
+        <listitem>
+          <para>
+            The username used to log in. This is to support any legacy
+            implementations before Keystone switched to an ID/Name
+            schema for tenants.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          X-Role
+        </term>
+        <listitem>
+          <para>
+            The roles associated with that user
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+</section>
+</section>
+<section xml:id="references">
+  <title>References</title>
+  <para>
+  </para>
+</section>
+</section>

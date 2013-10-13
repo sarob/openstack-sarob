@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="API-Endpoint">
+<title>API Endpoint</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Nova has a system for managing multiple APIs on different subdomains.
+  Currently there is support for the OpenStack API, as well as the
+  Amazon EC2 API.
+</para>
+</section>
+<section xml:id="common-components">
+  <title>Common Components</title>
+<section xml:id="the-nova.api-module">
+    <title>The nova.api Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.api.cloud-module">
+    <title>The nova.api.cloud Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="openstack-api">
+  <title>OpenStack API</title>
+<section xml:id="the-openstack-module">
+    <title>The openstack Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-auth-module">
+    <title>The auth Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-backup_schedules-module">
+    <title>The backup_schedules Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-faults-module">
+    <title>The faults Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-flavors-module">
+    <title>The flavors Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-images-module">
+    <title>The images Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-servers-module">
+    <title>The servers Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-sharedipgroups-module">
+    <title>The sharedipgroups Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="ec2-api">
+  <title>EC2 API</title>
+<section xml:id="the-nova.api.ec2-module">
+    <title>The nova.api.ec2 Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-apirequest-module">
+    <title>The apirequest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-cloud-module">
+    <title>The cloud Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-images-module-1">
+    <title>The images Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-metadatarequesthandler-module">
+    <title>The metadatarequesthandler Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-api_unittest-module">
+    <title>The api_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api_integration-module">
+    <title>The api_integration Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-cloud_unittest-module">
+    <title>The cloud_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api.fakes-module">
+    <title>The api.fakes Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api.test_wsgi-module">
+    <title>The api.test_wsgi Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_api-module">
+    <title>The test_api Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_auth-module">
+    <title>The test_auth Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_faults-module">
+    <title>The test_faults Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_flavors-module">
+    <title>The test_flavors Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_images-module">
+    <title>The test_images Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_servers-module">
+    <title>The test_servers Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_sharedipgroups-module">
+    <title>The test_sharedipgroups Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

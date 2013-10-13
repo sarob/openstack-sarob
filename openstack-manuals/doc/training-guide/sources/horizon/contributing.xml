@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Contributing-Guide">
+<title>Contributing Guide</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  First and foremost, thank you for wanting to contribute! It's the only
+  way open source works!
+</para>
+<para>
+  Before you dive into writing patches, here are some of the basics:
+</para>
+<itemizedlist>
+  <listitem>
+    <para>
+      Project page:
+      <ulink url="http://launchpad.net/horizon">http://launchpad.net/horizon</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Bug tracker:
+      <ulink url="https://bugs.launchpad.net/horizon">https://bugs.launchpad.net/horizon</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Source code:
+      <ulink url="https://github.com/openstack/horizon">https://github.com/openstack/horizon</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Code review:
+      <ulink url="https://review.openstack.org/#q,status:open+project:openstack/horizon,n,z">https://review.openstack.org/#q,status:open+project:openstack/horizon,n,z</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Jenkins build status:
+      <ulink url="https://jenkins.openstack.org/view/Horizon/">https://jenkins.openstack.org/view/Horizon/</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      IRC Channel: #openstack-horizon on Freenode.
+    </para>
+  </listitem>
+</itemizedlist>
+</section>
+<section xml:id="making-contributions">
+  <title>Making Contributions</title>
+<section xml:id="getting-started">
+    <title>Getting Started</title>
+    <para>
+      We'll start by assuming you've got a working checkout of the
+      repository (if not then please see the quickstart).
+    </para>
+    <para>
+      Second, you'll need to take care of a couple administrative tasks:
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Create an account on Launchpad.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sign the <link xlink:href="http://wiki.openstack.org/CLA">OpenStack
+          Contributor License Agreement</link> and follow the
+          associated instructions to verify your signature.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Join the <link xlink:href="https://launchpad.net/~horizon">Horizon
+          Developers</link> team on Launchpad.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Follow the
+          <link xlink:href="http://wiki.openstack.org/GerritWorkflow">instructions
+          for setting up git-review</link> in your development
+          environment.
+        </para>
+      </listitem>
+    </orderedlist>
+    <para>
+      Whew! Got that all that? Okay! You're good to go.
+    </para>
+</section>
+<section xml:id="ways-to-contribute">
+    <title>Ways To Contribute</title>
+    <para>
+      The easiest way to get started with Horizon's code is to pick a
+      bug on Launchpad that interests you, and start working on that.
+      Alternatively, if there's an OpenStack API feature you would like
+      to see implemented in Horizon feel free to try building it.
+    </para>
+    <para>
+      If those are too big, there are lots of great ways to get involved
+      without plunging in head-first:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Report bugs, triage new tickets, and review old tickets on the
+          <link xlink:href="https://bugs.launchpad.net/horizon">bug
+          tracker</link>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Propose ideas for improvements via Launchpad Blueprints, via
+          the mailing list on the project page, or on IRC.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Write documentation!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Write unit tests for untested code!
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+<section xml:id="choosing-issues-to-work-on">
+    <title>Choosing Issues To Work On</title>
+    <para>
+      In general, if you want to write code, there are three cases for
+      issues you might want to work on:
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Confirmed bugs
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Approved blueprints (features)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          New bugs you've discovered
+        </para>
+      </listitem>
+    </orderedlist>
+    <para>
+      If you have an idea for a new feature that isn't in a blueprint
+      yet, it's a good idea to write the blueprint first so you don't
+      end up writing a bunch of code that may not go in the direction
+      the community wants.
+    </para>
+    <para>
+      For bugs, open the bug first, but if you can reproduce the bug
+      reliably and identify its cause then it's usually safe to start
+      working on it. However, getting independent confirmation (and
+      verifying that it's not a duplicate) is always a good idea if you
+      can be patient.
+    </para>
+</section>
+<section xml:id="after-you-write-your-patch">
+    <title>After You Write Your Patch</title>
+    <para>
+      Once you've made your changes, there are a few things to do:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Make sure the unit tests pass:
+          <literal>./run_tests.sh</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Make sure PEP8 is clean:
+          <literal>./run_tests.sh --pep8</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Make sure your code is up-to-date with the latest master:
+          <literal>git pull --rebase</literal>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Finally, run <literal>git review</literal> to upload your
+          changes to Gerrit for review.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The Horizon core developers will be notified of the new review and
+      will examine it in a timely fashion, either offering feedback or
+      approving it to be merged. If the review is approved, it is sent
+      to Jenkins to verify the unit tests pass and it can be merged
+      cleanly. Once Jenkins approves it, the change will be merged to
+      the master repository and it's time to celebrate!
+    </para>
+</section>
+</section>
+<section xml:id="etiquette">
+  <title>Etiquette</title>
+  <para>
+    The community's guidelines for etiquette are fairly simple:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Treat everyone respectfully and professionally.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        If a bug is &quot;in progress&quot; in the bug tracker, don't
+        start working on it without contacting the author. Try on IRC,
+        or via the launchpad email contact link. If you don't get a
+        response after a reasonable time, then go ahead. Checking first
+        avoids duplicate work and makes sure nobody's toes get stepped
+        on.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        If a blueprint is assigned, even if it hasn't been started, be
+        sure you contact the assignee before taking it on. These larger
+        issues often have a history of discussion or specific
+        implementation details that the assignee may be aware of that
+        you are not.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Please don't re-open tickets closed by a core developer. If you
+        disagree with the decision on the ticket, the appropriate
+        solution is to take it up on IRC or the mailing list.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Give credit where credit is due; if someone helps you
+        substantially with a piece of code, it's polite (though not
+        required) to thank them in your commit message.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="code-style">
+  <title>Code Style</title>
+<section xml:id="python">
+    <title>Python</title>
+    <para>
+      We follow
+      <link xlink:href="http://www.python.org/dev/peps/pep-0008/">PEP8</link>
+      for all our Python code, and use <literal>pep8.py</literal>
+      (available via the shortcut
+      <literal>./run_tests.sh --pep8</literal>) to validate that our
+      code meets proper Python style guidelines.
+    </para>
+</section>
+<section xml:id="django">
+    <title>Django</title>
+    <para>
+      Additionally, we follow
+      <link xlink:href="https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/">Django's
+      style guide</link> for templates, views, and other miscellany.
+    </para>
+</section>
+<section xml:id="javascript">
+    <title>JavaScript</title>
+    <para>
+      As a project, Horizon adheres to code quality standards for our
+      JavaScript just as we do for our Python. To that end we recommend
+      (but do not strictly enforce) the use of
+      <link xlink:href="http://jslint.com/">JSLint</link> to validate some
+      general best practices.
+    </para>
+    <para>
+      The default options are mostly good, but the following accommodate
+      some allowances we make:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Set <literal>Indentation</literal> to <literal>2</literal>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Enable the <literal>Assume console, alert, ...</literal>
+          option.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Enable the <literal>Assume a browser</literal> option.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Enable the
+          <literal>Tolerate missing 'use strict' pragma</literal>
+          option.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Clear the <literal>Maximum number of errors</literal> field.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Add <literal>horizon,$</literal> to the
+          <literal>Predefined</literal> list.
+        </para>
+      </listitem>
+    </itemizedlist>
+</section>
+<section xml:id="css">
+    <title>CSS</title>
+    <para>
+      Style guidelines for CSS are currently quite minimal. Do your best
+      to make the code readable and well-organized. Two spaces are
+      preferred for indentation so as to match both the JavaScript and
+      HTML files.
+    </para>
+</section>
+<section xml:id="html">
+    <title>HTML</title>
+    <para>
+      Again, readability is paramount; however be conscientous of how
+      the browser will handle whitespace when rendering the output. Two
+      spaces is the preferred indentation style to match all front-end
+      code.
+    </para>
+</section>
+<section xml:id="documentation">
+    <title>Documentation</title>
+    <para>
+      Horizon's documentation is written in reStructuredText and uses
+      Sphinx for additional parsing and functionality, and should follow
+      standard practices for writing reST. This includes:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Flow paragraphs such that lines wrap at 80 characters or less.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Use proper grammar, spelling, capitalization and punctuation
+          at all times.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Make use of Sphinx's autodoc feature to document modules,
+          classes and functions. This keeps the docs close to the
+          source.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Where possible, use Sphinx's cross-reference syntax (e.g.
+          <literal>:class:`~horizon.foo.Bar</literal>`) when referring
+          to other Horizon components. The better-linked our docs are,
+          the easier they are to use.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Be sure to generate the documentation before submitting a patch
+      for review. Unexpected warnings often appear when building the
+      documentation, and slight reST syntax errors frequently cause
+      links or cross-references not to work correctly.
+    </para>
+</section>
+<section xml:id="conventions">
+    <title>Conventions</title>
+    <para>
+      Simply by convention, we have a few rules about naming:
+    </para>
+    <blockquote>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The term &quot;project&quot; is used in place of Keystone's
+            &quot;tenant&quot; terminology in all user-facing text. The
+            term &quot;tenant&quot; is still used in API code to make
+            things more obvious for developers.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The term &quot;dashboard&quot; refers to a top-level
+            dashboard class, and &quot;panel&quot; to the sub-items
+            within a dashboard. Referring to a panel as a dashboard is
+            both confusing and incorrect.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </blockquote>
+</section>
+</section>
+</section>

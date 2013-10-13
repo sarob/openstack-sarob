@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Using-Glance's-Client-Tools">
+<title>Using Glance's Client Tools</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The command-line tool and python library for Glance are both installed
+  through the python-glanceclient project. Explore the following
+  resources for more information:
+</para>
+<itemizedlist>
+  <listitem>
+    <para>
+      <ulink url="http://docs.openstack.org/developer/python-glanceclient/">Official
+      Docs</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      <ulink url="http://pypi.python.org/pypi/python-glanceclient">Pypi
+      Page</ulink>
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      <ulink url="http://github.com/openstack/python-glanceclient">GitHub
+      Project</ulink>
+    </para>
+  </listitem>
+</itemizedlist>
+</article>
+</section>

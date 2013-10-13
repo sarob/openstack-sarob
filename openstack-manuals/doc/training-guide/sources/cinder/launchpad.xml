@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Project-hosting-with-Launchpad">
+<title>Project hosting with Launchpad</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  <ulink url="http://launchpad.net">Launchpad</ulink> hosts the Cinder
+  project. The Cinder project homepage on Launchpad is
+  <ulink url="http://launchpad.net/cinder">http://launchpad.net/cinder</ulink>.
+</para>
+</section>
+<section xml:id="launchpad-credentials">
+  <title>Launchpad credentials</title>
+  <para>
+    Creating a login on Launchpad is important even if you don't use the
+    Launchpad site itself, since Launchpad credentials are used for
+    logging in on several OpenStack-related sites. These sites include:
+  </para>
+  <blockquote>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <link xlink:href="http://wiki.openstack.org">Wiki</link>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Gerrit (see gerrit)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Jenkins (see jenkins)
+        </para>
+      </listitem>
+    </itemizedlist>
+  </blockquote>
+</section>
+<section xml:id="mailing-list">
+  <title>Mailing list</title>
+  <para>
+    The mailing list email is
+    <literal>openstack@lists.openstack.org</literal>. This is a common
+    mailing list across the OpenStack projects. To participate in the
+    mailing list:
+  </para>
+  <orderedlist>
+    <listitem>
+      <para>
+        Subscribe to the list at
+        <link xlink:href="http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack">http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack</link>
+      </para>
+    </listitem>
+  </orderedlist>
+  <para>
+    The mailing list archives are at
+    <link xlink:href="http://lists.openstack.org/pipermail/openstack/">http://lists.openstack.org/pipermail/openstack/</link>.
+  </para>
+</section>
+<section xml:id="bug-tracking">
+  <title>Bug tracking</title>
+  <para>
+    Report Cinder bugs at
+    <link xlink:href="https://bugs.launchpad.net/cinder">https://bugs.launchpad.net/cinder</link>
+  </para>
+</section>
+<section xml:id="feature-requests-blueprints">
+  <title>Feature requests (Blueprints)</title>
+  <para>
+    Cinder uses Launchpad Blueprints to track feature requests.
+    Blueprints are at
+    <link xlink:href="https://blueprints.launchpad.net/cinder">https://blueprints.launchpad.net/cinder</link>.
+  </para>
+</section>
+<section xml:id="technical-support-answers">
+  <title>Technical support (Answers)</title>
+  <para>
+    Cinder uses Launchpad Answers to track Cinder technical support
+    questions. The Cinder Answers page is at
+    <link xlink:href="https://answers.launchpad.net/cinder">https://answers.launchpad.net/cinder</link>.
+  </para>
+  <para>
+    Note that <link xlink:href="http://ask.openstack.org">Ask
+    OpenStack</link> (which is not hosted on Launchpad) can also be
+    used for technical support requests.
+  </para>
+</section>
+</section>

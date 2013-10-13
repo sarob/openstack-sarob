@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Developing-with-Keystone">
+<title>Developing with Keystone</title>
+<section xml:id="setup">
+  <title>Setup</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Get your development environment set up according to setup. The
+    instructions from here will assume that you have installed keystone
+    into a virtualenv. If you chose not to, simply exclude
+    &quot;tools/with_venv.sh&quot; from the example commands below.
+  </para>
+</sect1>
+</section>
+<section xml:id="configuring-keystone">
+  <title>Configuring Keystone</title>
+  <para>
+    keystone requires a configuration file. There is a sample
+    configuration file that can be used to get started:
+  </para>
+  <programlisting>
+$ cp etc/keystone.conf.sample etc/keystone.conf
+</programlisting>
+  <para>
+    The defaults are enough to get you going, but you can make any
+    changes if needed.
+  </para>
+</section>
+<section xml:id="running-keystone">
+  <title>Running Keystone</title>
+  <para>
+    To run the keystone Admin and API server instances, use:
+  </para>
+  <programlisting>
+$ tools/with_venv.sh bin/keystone-all
+</programlisting>
+  <para>
+    this runs keystone with the configuration the etc/ directory of the
+    project. See configuration for details on how Keystone is
+    configured. By default, keystone is configured with SQL backends.
+  </para>
+</section>
+<section xml:id="interacting-with-keystone">
+  <title>Interacting with Keystone</title>
+  <para>
+    You can interact with Keystone through the command line using
+    man/keystone-manage which allows you to initialize keystone, etc.
+  </para>
+  <para>
+    You can also interact with Keystone through its REST API. There is a
+    python keystone client library
+    <link xlink:href="https://github.com/openstack/python-keystoneclient">python-keystoneclient</link>
+    which interacts exclusively through the REST API, and which keystone
+    itself uses to provide its command-line interface.
+  </para>
+  <para>
+    When initially getting set up, after you've configured which
+    databases to use, you're probably going to need to run the following
+    to your database schema in place:
+  </para>
+  <programlisting>
+$ bin/keystone-manage db_sync
+</programlisting>
+</section>
+<section xml:id="database-schema-migrations">
+  <title>Database Schema Migrations</title>
+  <para>
+    Keystone uses
+    <link xlink:href="http://code.google.com/p/sqlalchemy-migrate/">SQLAlchemymmigrate</link>
+    to migrate the SQL database between revisions. For core components,
+    the migrations are kept in a central repository under
+    <literal>keystone/common/sql/migrate_repo</literal>.
+  </para>
+  <para>
+    Extensions should be created as directories under
+    <literal>keystone/contrib</literal>. An extension that requires SQL
+    migrations should not change the common repository, but should
+    instead have its own repository. This repository must be in the
+    extension's directory in
+    <literal>keystone/contrib/&lt;extension&gt;/migrate_repo</literal>.
+    In addition, it needs a subdirectory named
+    <literal>versions</literal>. For example, if the extension name is
+    <literal>my_extension</literal> then the directory structure would
+    be
+    <literal>keystone/contrib/my_extension/migrate_repo/versions/</literal>.
+    For the migration to work, both the <literal>migrate_repo</literal>
+    and <literal>versions</literal> subdirectories must have
+    <literal>__init__.py</literal> files. SQLAlchemy-migrate will look
+    for a configuration file in the <literal>migrate_repo</literal>
+    named <literal>migrate.cfg</literal>. This conforms to a key/value
+    ini file format. A sample configuration file with the minimal set of
+    values is:
+  </para>
+  <programlisting>
+[db_settings]
+repository_id=my_extension
+version_table=migrate_version
+required_dbs=[]
+</programlisting>
+  <para>
+    The directory <literal>keystone/contrib/example</literal> contains a
+    sample extension migration.
+  </para>
+  <para>
+    Migrations must be explicitly run for each extension individually.
+    To run a migration for a specific extension, run
+    <literal>keystone-manage --extension &lt;name&gt; db_sync</literal>.
+  </para>
+</section>
+<section xml:id="initial-sample-data">
+  <title>Initial Sample Data</title>
+  <para>
+    There is an included script which is helpful in setting up some
+    initial sample data for use with keystone:
+  </para>
+  <programlisting>
+$ SERVICE_TOKEN=ADMIN tools/with_venv.sh tools/sample_data.sh
+</programlisting>
+  <para>
+    Notice it requires a service token read from an environment variable
+    for authentication. The default value &quot;ADMIN&quot; is from the
+    <literal>admin_token</literal> option in the
+    <literal>[DEFAULT]</literal> section in
+    <literal>etc/keystone.conf</literal>.
+  </para>
+  <para>
+    Once run, you can see the sample data that has been created by using
+    the
+    <link xlink:href="https://github.com/openstack/python-keystoneclient">python-keystoneclient</link>
+    command-line interface:
+  </para>
+  <programlisting>
+$ tools/with_venv.sh keystone --token ADMIN --endpoint http://127.0.0.1:35357/v2.0/ user-list
+</programlisting>
+<section xml:id="running-tests">
+    <title>Running Tests</title>
+    <para>
+      To run the full suites of tests maintained within Keystone, run:
+    </para>
+    <programlisting>
+$ ./run_tests.sh
+</programlisting>
+    <para>
+      This shows realtime feedback during test execution, iterates over
+      multiple configuration variations, and uses external projects to
+      do light integration testing to verify the keystone API against
+      other projects.
+    </para>
+</section>
+</section>
+<section xml:id="test-structure">
+  <title>Test Structure</title>
+  <para>
+    <literal>./run_test.sh</literal> uses its python cohort
+    (<literal>run_tests.py</literal>) to iterate through the
+    <literal>keystone/tests</literal> directory, using Nosetest to
+    collect the tests and invoke them using an OpenStack custom test
+    running that displays the tests as well as the time taken to run
+    those tests.
+  </para>
+  <para>
+    Not all of the tests in the tests directory are strictly unit tests.
+    Keystone intentionally includes tests that run the service locally
+    and drives the entire configuration to achieve basic functional
+    testing.
+  </para>
+  <para>
+    For the functional tests, an in-memory key-value store is used to
+    keep the tests fast.
+  </para>
+  <para>
+    Within the tests directory, the general structure of the tests is a
+    basic set of tests represented under a test class, and then
+    subclasses of those tests under other classes with different
+    configurations to drive different backends through the APIs.
+  </para>
+  <para>
+    For example, <literal>test_backend.py</literal> has a sequence of
+    tests under the class <literal>IdentityTests</literal> that will
+    work with the default drivers as configured in this projects etc/
+    directory. <literal>test_backend_sql.py</literal> subclasses those
+    tests, changing the configuration by overriding with configuration
+    files stored in the tests directory aimed at enabling the SQL
+    backend for the Identity module.
+  </para>
+  <para>
+    Likewise, <literal>test_keystoneclient.py</literal> takes advantage
+    of the tests written against <literal>KeystoneClientTests</literal>
+    to verify the same tests function through different drivers and
+    releases of the Keystone client.
+  </para>
+  <para>
+    The class <literal>CompatTestCase</literal> does the work of
+    checking out a specific version of python-keystoneclient, and then
+    verifying it against a temporarily running local instance to
+    explicitly verify basic functional testing across the API.
+  </para>
+</section>
+<section xml:id="testing-schema-migrations">
+  <title>Testing Schema Migrations</title>
+  <para>
+    The application of schema migrations can be tested using SQLAlchemy
+    Migrate’s built-in test runner, one migration at a time.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">warning</emphasis>
+    </para>
+    <para>
+      This may leave your database in an inconsistent state; attempt
+      this in non-production environments only!
+    </para>
+  </blockquote>
+  <para>
+    This is useful for testing the <emphasis>next</emphasis> migration
+    in sequence (both forward &amp; backward) in a database under
+    version control:
+  </para>
+  <programlisting>
+python keystone/common/sql/migrate_repo/manage.py test \
+--url=sqlite:///test.db \
+--repository=keystone/common/sql/migrate_repo/
+</programlisting>
+  <para>
+    This command references to a SQLite database (test.db) to be used.
+    Depending on the migration, this command alone does not make
+    assertions as to the integrity of your data during migration.
+  </para>
+</section>
+<section xml:id="writing-tests">
+  <title>Writing Tests</title>
+  <para>
+    To add tests covering all drivers, update the relevant base test
+    class (<literal>test_backend.py</literal>,
+    <literal>test_legacy_compat.py</literal>, and
+    <literal>test_keystoneclient.py</literal>).
+  </para>
+  <para>
+    To add new drivers, subclass the <literal>test_backend.py</literal>
+    (look towards <literal>test_backend_sql.py</literal> or
+    <literal>test_backend_kvs.py</literal> for examples) and update the
+    configuration of the test class in <literal>setUp()</literal>.
+  </para>
+</section>
+<section xml:id="further-testing">
+  <title>Further Testing</title>
+  <para>
+    <link xlink:href="http://devstack.org/">devstack</link> is the
+    <emphasis>best</emphasis> way to quickly deploy keystone with the
+    rest of the OpenStack universe and should be critical step in your
+    development workflow!
+  </para>
+  <para>
+    You may also be interested in either the
+    <link xlink:href="https://github.com/openstack/openstack-ci">OpenStack
+    Continuous Integration Project</link> or the
+    <link xlink:href="https://github.com/openstack/tempest">OpenStack
+    Integration Testing Project</link>.
+  </para>
+</section>
+<section xml:id="ldap">
+  <title>LDAP</title>
+  <para>
+    LDAP has a fake backend that performs rudimentary operations. If you
+    are building more significant LDAP functionality, you should test
+    against a live LDAP server. Devstack has an option to set up a
+    directory server for Keystone to use. Add ldap to the
+    <literal>ENABLED_SERVICES</literal> environment variable, and set
+    environment variables
+    <literal>KEYSTONE_IDENTITY_BACKEND=ldap</literal> and
+    <literal>KEYSTONE_CLEAR_LDAP=yes</literal> in your
+    <literal>localrc</literal> file.
+  </para>
+  <para>
+    The unit tests can be run against a live server with
+    <literal>keystone/tests/_ldap_livetest.py</literal>. The default
+    password is <literal>test</literal> but if you have installed
+    devstack with a different LDAP password, modify the file
+    <literal>keystone/tests/backend_liveldap.conf</literal> to reflect
+    your password.
+  </para>
+</section>
+<section xml:id="translated-responses">
+  <title>Translated responses</title>
+  <para>
+    The Keystone server can provide error responses translated into the
+    language in the <literal>Accept-Language</literal> header of the
+    request. In order to test this in your development environment,
+    there's a couple of things you need to do.
+  </para>
+  <orderedlist numeration="arabic">
+    <listitem>
+      <para>
+        Build the message files. Run the following command in your
+        keystone directory:
+      </para>
+    </listitem>
+  </orderedlist>
+  <blockquote>
+    <para>
+      $ python setup.py compile_catalog
+    </para>
+  </blockquote>
+  <para>
+    This will generate .mo files like
+    keystone/locale/[lang]/LC_MESSAGES/[lang].mo
+  </para>
+  <orderedlist numeration="arabic">
+    <listitem override="2">
+      <para>
+        When running Keystone, set the
+        <literal>KEYSTONE_LOCALEDIR</literal> environment variable to
+        the keystone/locale directory. For example:
+      </para>
+    </listitem>
+  </orderedlist>
+  <blockquote>
+    <para>
+      $ KEYSTONE_LOCALEDIR=/opt/stack/keystone/keystone/locale
+      keystone-all
+    </para>
+  </blockquote>
+  <para>
+    Now you can get a translated error response:
+  </para>
+  <programlisting>
+$ curl -s -H &quot;Accept-Language: zh&quot; http://localhost:5000/notapath | python -mjson.tool
+{
+    &quot;error&quot;: {
+        &quot;code&quot;: 404,
+        &quot;message&quot;: &quot;\u627e\u4e0d\u5230\u8cc7\u6e90\u3002&quot;,
+        &quot;title&quot;: &quot;Not Found&quot;
+    }
+}
+</programlisting>
+</section>
+<section xml:id="caching-layer">
+  <title>Caching Layer</title>
+  <para>
+    The caching layer is designed to be applied to any
+    <literal>manager</literal> object within Keystone via the use of the
+    <literal>on_arguments</literal> decorator provided in the
+    <literal>keystone.common.cache</literal> module. This decorator
+    leverages
+    <link xlink:href="http://dogpilecache.readthedocs.org/">dogpile.cache</link>
+    caching system to provide a flexible caching backend.
+  </para>
+  <para>
+    It is recommended that each of the managers have an independent
+    toggle within the config file to enable caching. The easiest method
+    to utilize the toggle within the configuration file is to define a
+    <literal>caching</literal> boolean option within that manager's
+    configuration section (e.g. <literal>identity</literal>). Once that
+    option is defined you can pass function to the
+    <literal>on_arguments</literal> decorator with the named argument
+    <literal>should_cache_fn</literal>. In the
+    <literal>keystone.common.cache</literal> module, there is a function
+    called <literal>should_cache_fn</literal>, which will provide a
+    reference, to a function, that will consult the global cache
+    <literal>enabled</literal> option as well as the specific manager's
+    caching enable toggle.
+  </para>
+  <blockquote>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term>
+            If a section-specific boolean option is not defined in the
+            config section specified when
+          </term>
+          <listitem>
+            <para>
+              calling <literal>should_cache_fn</literal>, the returned
+              function reference will default to enabling caching for
+              that <literal>manager</literal>.
+            </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </blockquote>
+  </blockquote>
+  <para>
+    Example use of cache and <literal>should_cache_fn</literal> (in this
+    example, <literal>token</literal> is the manager):
+  </para>
+  <programlisting>
+from keystone.common import cache
+SHOULD_CACHE = cache.should_cache_fn('token')
+
+@cache.on_arguments(should_cache_fn=SHOULD_CACHE)
+def cacheable_function(arg1, arg2, arg3):
+    ...
+    return some_value
+</programlisting>
+  <para>
+    With the above example, each call to the
+    <literal>cacheable_function</literal> would check to see if the
+    arguments passed to it matched a currently valid cached item. If the
+    return value was cached, the caching layer would return the cached
+    value; if the return value was not cached, the caching layer would
+    call the function, pass the value to the
+    <literal>SHOULD_CACHE</literal> function reference, which would then
+    determine if caching was globally enabled and enabled for the
+    <literal>token</literal> manager. If either caching toggle is
+    disabled, the value is returned but not cached.
+  </para>
+  <para>
+    It is recommended that each of the managers have an independent
+    configurable time-to-live (TTL). If a configurable TTL has been
+    defined for the manager configuration section, it is possible to
+    pass it to the <literal>cache.on_arguments</literal> decorator with
+    the named-argument <literal>expiration_time</literal>. For
+    consistency, it is recommended that this option be called
+    <literal>cache_time</literal> and default to
+    <literal>None</literal>. If the <literal>expiration_time</literal>
+    argument passed to the decorator is set to <literal>None</literal>,
+    the expiration time will be set to the global default
+    (<literal>expiration_time</literal> option in the
+    <literal>[cache]</literal> configuration section.
+  </para>
+  <para>
+    Example of using a section specific <literal>cache_time</literal>
+    (in this example, <literal>identity</literal> is the manager):
+  </para>
+  <programlisting>
+from keystone.common import cache
+SHOULD_CACHE = cache.should_cache_fn('identity')
+
+@cache.on_arguments(should_cache_fn=SHOULD_CACHE,
+                    expiration_time=CONF.identity.cache_time)
+def cachable_function(arg1, arg2, arg3):
+    ...
+    return some_value
+</programlisting>
+  <para>
+    For cache invalidation, the <literal>on_arguments</literal>
+    decorator will add an <literal>invalidate</literal> method
+    (attribute) to your decorated function. To invalidate the cache, you
+    pass the same arguments to the <literal>invalidate</literal> method
+    as you would the normal function.
+  </para>
+  <para>
+    Example (using the above cacheable_function):
+  </para>
+  <programlisting>
+def invalidate_cache(arg1, arg2, arg3):
+    cacheable_function.invalidate(arg1, arg2, arg3)
+</programlisting>
+  <blockquote>
+    <para>
+      <emphasis role="strong">warning</emphasis>
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          The <literal>on_arguments</literal> decorator does not accept
+          keyword-arguments/named arguments. An
+        </term>
+        <listitem>
+          <para>
+            exception will be raised if keyword arguments are passed to
+            a caching-decorated function.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term>
+          In all cases methods work the same as functions except if you
+          are attempting to invalidate
+        </term>
+        <listitem>
+          <para>
+            the cache on a decorated bound-method, you need to pass
+            <literal>self</literal> to the <literal>invalidate</literal>
+            method as the first argument before the arguments.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+<section xml:id="building-the-documentation">
+    <title>Building the Documentation</title>
+    <para>
+      The documentation is all generated with Sphinx from within the
+      docs directory. To generate the full set of HTML documentation:
+    </para>
+    <programlisting>
+cd docs
+make autodoc
+make html
+make man
+</programlisting>
+    <para>
+      the results are in the docs/build/html and docs/build/man
+      directories respectively.
+    </para>
+</section>
+</section>
+</section>

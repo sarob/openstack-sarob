@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Common-Image-Properties">
+<title>Common Image Properties</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  When adding an image to Glance, you may specify some common image
+  properties that may prove useful to consumers of your image.
+</para>
+<para>
+  This document explains the names of these properties and the expected
+  values.
+</para>
+<para>
+  The common image properties are also described in a JSON schema, found
+  in etc/schema-image.json in the Glance source code.
+</para>
+</section>
+<section xml:id="architecture">
+  <title><emphasis role="strong">architecture</emphasis></title>
+  <para>
+    Operating system architecture as specified in
+    <link xlink:href="http://docs.openstack.org/trunk/openstack-compute/admin/content/adding-images.html">http://docs.openstack.org/trunk/openstack-compute/admin/content/adding-images.html</link>
+  </para>
+</section>
+<section xml:id">
+  <title><emphasis role="strong">instance_uuid</emphasis></title>
+  <para>
+    The ID of the instance used to create this image.
+  </para>
+</section>
+<section xml:id">
+  <title><emphasis role="strong">kernel_id</emphasis></title>
+  <para>
+    The ID of image stored in Glance that should be used as the kernel
+    when booting an AMI-style image.
+  </para>
+</section>
+<section xml:id">
+  <title><emphasis role="strong">ramdisk_id</emphasis></title>
+  <para>
+    The ID of image stored in Glance that should be used as the ramdisk
+    when booting an AMI-style image.
+  </para>
+</section>
+<section xml:id="os_distro">
+  <title><emphasis role="strong">os_distro</emphasis></title>
+  <para>
+    The common name of the operating system distribution as specified in
+    <link xlink:href="http://docs.openstack.org/trunk/openstack-compute/admin/content/adding-images.html">http://docs.openstack.org/trunk/openstack-compute/admin/content/adding-images.html</link>
+  </para>
+</section>
+<section xml:id="os_version">
+  <title><emphasis role="strong">os_version</emphasis></title>
+  <para>
+    The operating system version as specified by the distributor.
+  </para>
+</section>
+</section>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Setting-Up-a-Development-Environment">
+<title>Setting Up a Development Environment</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  This page describes how to setup a working Python development
+  environment that can be used in developing nova on Ubuntu, Fedora or
+  Mac OS X. These instructions assume you're already familiar with git.
+</para>
+<para>
+  Following these instructions will allow you to run the nova unit
+  tests. If you want to be able to run nova (i.e., launch VM instances),
+  you will also need to install libvirt and at least one of the
+  <ulink url="http://wiki.openstack.org/HypervisorSupportMatrix">supported
+  hypervisors</ulink>. Running nova is currently only supported on
+  Linux, although you can run the unit tests on Mac OS X.
+</para>
+</section>
+<section xml:id="virtual-environments">
+  <title>Virtual environments</title>
+  <para>
+    Nova development uses a set of shell scripts in DevStack. Virtual
+    enviroments with venv are also available with the source code.
+  </para>
+  <para>
+    The easiest way to build a fully functional development environment
+    is with DevStack. Create a machine (such as a VM or Vagrant box)
+    running a distribution supported by DevStack and install DevStack
+    there. For example, there is a Vagrant script for DevStack at
+    <link xlink:href="https://github.com/jogo/DevstackUp">https://github.com/jogo/DevstackUp</link>.
+  </para>
+  <blockquote>
+    <blockquote>
+      <para>
+        <emphasis role="strong">note</emphasis>
+      </para>
+      <para>
+        If you prefer not to use devstack, you can still check out
+        source code on your local machine and develop from there.
+      </para>
+    </blockquote>
+  </blockquote>
+</section>
+<section xml:id="linux-systems">
+  <title>Linux Systems</title>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      This section is tested for Nova on Ubuntu (10.10-64) and
+      Fedora-based (RHEL 6.1) distributions. Feel free to add notes and
+      change according to your experiences or operating system.
+    </para>
+  </blockquote>
+  <para>
+    Install the prerequisite packages.
+  </para>
+  <para>
+    On Ubuntu:
+  </para>
+  <programlisting>
+sudo apt-get install python-dev libssl-dev python-pip git-core libxml2-dev libxslt-dev
+</programlisting>
+  <para>
+    On Ubuntu Precise (12.04) you may also need to add the following
+    packages:
+  </para>
+  <programlisting>
+sudo apt-get build-dep python-mysqldb
+</programlisting>
+  <para>
+    On Fedora-based distributions (e.g., Fedora/RHEL/CentOS/Scientific
+    Linux):
+  </para>
+  <programlisting>
+sudo yum install python-devel openssl-devel python-pip git gcc libxslt-devel mysql-devel python-pip postgresql-devel
+sudo pip-python install tox
+</programlisting>
+</section>
+<section xml:id="mac-os-x-systems">
+  <title>Mac OS X Systems</title>
+  <para>
+    Install virtualenv:
+  </para>
+  <programlisting>
+sudo easy_install virtualenv
+</programlisting>
+  <para>
+    Check the version of OpenSSL you have installed:
+  </para>
+  <programlisting>
+openssl version
+</programlisting>
+  <para>
+    If you have installed OpenSSL 1.0.0a, which can happen when
+    installing a MacPorts package for OpenSSL, you will see an error
+    when running
+    <literal>nova.tests.auth_unittest.AuthTestCase.test_209_can_generate_x509</literal>.
+  </para>
+  <para>
+    The stock version of OpenSSL that ships with Mac OS X 10.6 (OpenSSL
+    0.9.8l) or Mac OS X 10.7 (OpenSSL 0.9.8r) works fine with nova.
+  </para>
+</section>
+<section xml:id="getting-the-code">
+  <title>Getting the code</title>
+  <para>
+    Grab the code from GitHub:
+  </para>
+  <programlisting>
+git clone https://github.com/openstack/nova.git
+cd nova
+</programlisting>
+</section>
+<section xml:id="running-unit-tests">
+  <title>Running unit tests</title>
+  <para>
+    The unit tests will run by default inside a virtualenv in the
+    <literal>.venv</literal> directory. Run the unit tests by doing:
+  </para>
+  <programlisting>
+./run_tests.sh
+</programlisting>
+  <para>
+    The first time you run them, you will be asked if you want to create
+    a virtual environment (hit &quot;y&quot;):
+  </para>
+  <programlisting>
+No virtual environment found...create one? (Y/n)
+</programlisting>
+  <para>
+    See unit_tests for more details.
+  </para>
+</section>
+<section xml:id="manually-installing-and-using-the-virtualenv">
+  <title>Manually installing and using the virtualenv</title>
+  <para>
+    You can manually install the virtual environment instead of having
+    <literal>run_tests.sh</literal> do it for you:
+  </para>
+  <programlisting>
+python tools/install_venv.py
+</programlisting>
+  <para>
+    This will install all of the Python packages listed in the
+    <literal>requirements.txt</literal> file into your virtualenv. There
+    will also be some additional packages (pip, setuptools, greenlet)
+    that are installed by the <literal>tools/install_venv.py</literal>
+    file into the virutalenv.
+  </para>
+  <para>
+    If all goes well, you should get a message something like this:
+  </para>
+  <programlisting>
+Nova development environment setup is complete.
+</programlisting>
+  <para>
+    To activate the Nova virtualenv for the extent of your current shell
+    session you can run:
+  </para>
+  <programlisting>
+$ source .venv/bin/activate
+</programlisting>
+  <para>
+    Or, if you prefer, you can run commands in the virtualenv on a case
+    by case basis by running:
+  </para>
+  <programlisting>
+$ tools/with_venv.sh &lt;your command&gt;
+</programlisting>
+</section>
+<section xml:id="contributing-your-work">
+  <title>Contributing Your Work</title>
+  <para>
+    Once your work is complete you may wish to contribute it to the
+    project. Refer to
+    <link xlink:href="http://wiki.openstack.org/HowToContribute">HowToContribute</link>
+    for information. Nova uses the Gerrit code review system. For
+    information on how to submit your branch to Gerrit, see
+    <link xlink:href="http://wiki.openstack.org/GerritWorkflow">GerritWorkflow</link>.
+  </para>
+</section>
+</section>

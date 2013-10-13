@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Code-Reviews-with-Gerrit">
+<title>Code Reviews with Gerrit</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Cinder uses the
+  <ulink url="http://code.google.com/p/gerrit">Gerrit</ulink> tool to
+  review proposed code changes. The review site is
+  <ulink url="http://review.openstack.org">http://review.openstack.org</ulink>.
+</para>
+<para>
+  Gerrit is a complete replacement for Github pull requests.
+  All Github pull
+  requests to the Cinder repository will be ignored.
+</para>
+<para>
+  See <ulink url="http://wiki.openstack.org/GerritWorkflow">Gerrit
+  Workflow Quick Reference</ulink> for information about how to get
+  started using Gerrit. See
+  <ulink url="http://wiki.openstack.org/GerritJenkinsGithub">Gerrit,
+  Jenkins and Github</ulink> for more detailed documentation on how to
+  work with Gerrit.
+</para>
+</article>
+</section>

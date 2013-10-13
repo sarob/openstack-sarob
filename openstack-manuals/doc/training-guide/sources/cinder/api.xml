@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="API-Endpoint">
+<title>API Endpoint</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Cinder has a system for managing multiple APIs on different
+  subdomains. Currently there is support for the OpenStack API, as well
+  as the Amazon EC2 API.
+</para>
+</section>
+<section xml:id="common-components">
+  <title>Common Components</title>
+<section xml:id="the-cinder.api-module">
+    <title>The cinder.api Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-cinder.api.cloud-module">
+    <title>The cinder.api.cloud Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="openstack-api">
+  <title>OpenStack API</title>
+<section xml:id="the-openstack-module">
+    <title>The openstack Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-auth-module">
+    <title>The auth Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="ec2-api">
+  <title>EC2 API</title>
+<section xml:id="the-cinder.api.ec2-module">
+    <title>The cinder.api.ec2 Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-cloud-module">
+    <title>The cloud Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-metadatarequesthandler-module">
+    <title>The metadatarequesthandler Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-api_unittest-module">
+    <title>The api_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api_integration-module">
+    <title>The api_integration Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-cloud_unittest-module">
+    <title>The cloud_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api.fakes-module">
+    <title>The api.fakes Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-api.test_wsgi-module">
+    <title>The api.test_wsgi Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_api-module">
+    <title>The test_api Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_auth-module">
+    <title>The test_auth Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-test_faults-module">
+    <title>The test_faults Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

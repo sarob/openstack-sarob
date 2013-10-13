@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Fake-Drivers">
+<title>Fake Drivers</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  When the real thing isn't available and you have some development to
+  do these fake implementations of various drivers let you get on with
+  your day.
+</para>
+</section>
+<section xml:id="the-nova.virt.fake-module">
+  <title>The nova.virt.fake Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.auth.fakeldap-module">
+  <title>The nova.auth.fakeldap Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.tests.service_unittest.fakemanager-class">
+  <title>The nova.tests.service_unittest.FakeManager Class</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.tests.api.openstack.fakes-module">
+  <title>The nova.tests.api.openstack.fakes Module</title>
+  <para>
+  </para>
+</section>
+</section>

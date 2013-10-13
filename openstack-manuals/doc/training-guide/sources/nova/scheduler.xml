@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Scheduler">
+<title>Scheduler</title>
+<section xml:id="the-nova.scheduler.manager-module">
+  <title>The nova.scheduler.manager Module</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  </para>
+</sect1>
+</section>
+<section xml:id="the-nova.scheduler.driver-module">
+  <title>The nova.scheduler.driver Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.scheduler.chance-driver">
+  <title>The nova.scheduler.chance Driver</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-scheduler_unittest-module">
+    <title>The scheduler_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

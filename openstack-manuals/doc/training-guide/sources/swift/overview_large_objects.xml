@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Large-Object-Support">
+<title>Large Object Support</title>
+<section xml:id="overview">
+  <title>Overview</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Swift has a limit on the size of a single uploaded object; by
+    default this is 5GB. However, the download size of a single object
+    is virtually unlimited with the concept of segmentation. Segments of
+    the larger object are uploaded and a special manifest file is
+    created that, when downloaded, sends all the segments concatenated
+    as a single object. This also offers much greater upload speed with
+    the possibility of parallel uploads of the segments.
+  </para>
+</sect1>
+</section>
+<section xml:id="dynamic-large-objects">
+  <title>Dynamic Large Objects</title>
+  <para>
+  </para>
+</section>
+<section xml:id="using-swift">
+  <title>Using <literal>swift</literal></title>
+  <para>
+    The quickest way to try out this feature is use the
+    <literal>swift</literal> Swift Tool included with the
+    <link xlink:href="http://github.com/openstack/python-swiftclient">python-swiftclient</link>
+    library. You can use the <literal>-S</literal> option to specify the
+    segment size to use when splitting a large file. For example:
+  </para>
+  <programlisting>
+swift upload test_container -S 1073741824 large_file
+</programlisting>
+  <para>
+    This would split the large_file into 1G segments and begin uploading
+    those segments in parallel. Once all the segments have been
+    uploaded, <literal>swift</literal> will then create the manifest
+    file so the segments can be downloaded as one.
+  </para>
+  <para>
+    So now, the following <literal>swift</literal> command would
+    download the entire large object:
+  </para>
+  <programlisting>
+swift download test_container large_file
+</programlisting>
+  <para>
+    <literal>swift</literal> uses a strict convention for its segmented
+    object support. In the above example it will upload all the segments
+    into a second container named test_container_segments. These
+    segments will have names like
+    large_file/1290206778.25/21474836480/00000000,
+    large_file/1290206778.25/21474836480/00000001, etc.
+  </para>
+  <para>
+    The main benefit for using a separate container is that the main
+    container listings will not be polluted with all the segment names.
+    The reason for using the segment name format of
+    &lt;name&gt;/&lt;timestamp&gt;/&lt;size&gt;/&lt;segment&gt; is so
+    that an upload of a new file with the same name won't overwrite the
+    contents of the first until the last moment when the manifest file
+    is updated.
+  </para>
+  <para>
+    <literal>swift</literal> will manage these segment files for you,
+    deleting old segments on deletes and overwrites, etc. You can
+    override this behavior with the <literal>--leave-segments</literal>
+    option if desired; this is useful if you want to have multiple
+    versions of the same large object available.
+  </para>
+</section>
+<section xml:id="direct-api">
+  <title>Direct API</title>
+  <para>
+    You can also work with the segments and manifests directly with HTTP
+    requests instead of having <literal>swift</literal> do that for you.
+    You can just upload the segments like you would any other object and
+    the manifest is just a zero-byte file with an extra
+    <literal>X-Object-Manifest</literal> header.
+  </para>
+  <para>
+    All the object segments need to be in the same container, have a
+    common object name prefix, and their names sort in the order they
+    should be concatenated. They don't have to be in the same container
+    as the manifest file will be, which is useful to keep container
+    listings clean as explained above with <literal>swift</literal>.
+  </para>
+  <para>
+    The manifest file is simply a zero-byte file with the extra
+    <literal>X-Object-Manifest: &lt;container&gt;/&lt;prefix&gt;</literal>
+    header, where <literal>&lt;container&gt;</literal> is the container
+    the object segments are in and <literal>&lt;prefix&gt;</literal> is
+    the common prefix for all the segments.
+  </para>
+  <para>
+    It is best to upload all the segments first and then create or
+    update the manifest. In this way, the full object won't be available
+    for downloading until the upload is complete. Also, you can upload a
+    new set of segments to a second location and then update the
+    manifest to point to this new location. During the upload of the new
+    segments, the original manifest will still be available to download
+    the first set of segments.
+  </para>
+  <para>
+    Here's an example using <literal>curl</literal> with tiny 1-byte
+    segments:
+  </para>
+  <programlisting>
+# First, upload the segments
+curl -X PUT -H 'X-Auth-Token: &lt;token&gt;' \
+    http://&lt;storage_url&gt;/container/myobject/1 --data-binary '1'
+curl -X PUT -H 'X-Auth-Token: &lt;token&gt;' \
+    http://&lt;storage_url&gt;/container/myobject/2 --data-binary '2'
+curl -X PUT -H 'X-Auth-Token: &lt;token&gt;' \
+    http://&lt;storage_url&gt;/container/myobject/3 --data-binary '3'
+
+# Next, create the manifest file
+curl -X PUT -H 'X-Auth-Token: &lt;token&gt;' \
+    -H 'X-Object-Manifest: container/myobject/' \
+    http://&lt;storage_url&gt;/container/myobject --data-binary ''
+
+# And now we can download the segments as a single object
+curl -H 'X-Auth-Token: &lt;token&gt;' \
+    http://&lt;storage_url&gt;/container/myobject
+</programlisting>
+</section>
+<section xml:id="static-large-objects">
+  <title>Static Large Objects</title>
+  <para>
+  </para>
+</section>
+<section xml:id="direct-api-1">
+  <title>Direct API</title>
+  <para>
+    SLO support centers around the user generated manifest file. After
+    the user has uploaded the segments into their account a manifest
+    file needs to be built and uploaded. All object segments, except the
+    last, must be above 1 MB (by default) in size. Please see the SLO
+    docs for slo-doc further details.
+  </para>
+</section>
+<section xml:id="additional-notes">
+  <title>Additional Notes</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        With a <literal>GET</literal> or <literal>HEAD</literal> of a
+        manifest file, the
+        <literal>X-Object-Manifest: &lt;container&gt;/&lt;prefix&gt;</literal>
+        header will be returned with the concatenated object so you can
+        tell where it's getting its segments from.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The response's <literal>Content-Length</literal> for a
+        <literal>GET</literal> or <literal>HEAD</literal> on the
+        manifest file will be the sum of all the segments in the
+        <literal>&lt;container&gt;/&lt;prefix&gt;</literal> listing,
+        dynamically. So, uploading additional segments after the
+        manifest is created will cause the concatenated object to be
+        that much larger; there's no need to recreate the manifest file.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The response's <literal>Content-Type</literal> for a
+        <literal>GET</literal> or <literal>HEAD</literal> on the
+        manifest will be the same as the <literal>Content-Type</literal>
+        set during the <literal>PUT</literal> request that created the
+        manifest. You can easily change the
+        <literal>Content-Type</literal> by reissuing the
+        <literal>PUT</literal>.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The response's <literal>ETag</literal> for a
+        <literal>GET</literal> or <literal>HEAD</literal> on the
+        manifest file will be the MD5 sum of the concatenated string of
+        ETags for each of the segments in the manifest (for DLO, from
+        the listing
+        <literal>&lt;container&gt;/&lt;prefix&gt;</literal>). Usually in
+        Swift the ETag is the MD5 sum of the contents of the object, and
+        that holds true for each segment independently. But it's not
+        meaningful to generate such an ETag for the manifest itself so
+        this method was chosen to at least offer change detection.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      If you are using the container sync feature you will need to
+      ensure both your manifest file and your segment files are synced
+      if they happen to be in different containers.
+    </para>
+  </blockquote>
+</section>
+<section xml:id="history">
+  <title>History</title>
+  <para>
+    Dynamic large object support has gone through various iterations
+    before settling on this implementation.
+  </para>
+  <para>
+    The primary factor driving the limitation of object size in swift is
+    maintaining balance among the partitions of the ring. To maintain an
+    even dispersion of disk usage throughout the cluster the obvious
+    storage pattern was to simply split larger objects into smaller
+    segments, which could then be glued together during a read.
+  </para>
+  <para>
+    Before the introduction of large object support some applications
+    were already splitting their uploads into segments and re-assembling
+    them on the client side after retrieving the individual pieces. This
+    design allowed the client to support backup and archiving of large
+    data sets, but was also frequently employed to improve performance
+    or reduce errors due to network interruption. The major disadvantage
+    of this method is that knowledge of the original partitioning scheme
+    is required to properly reassemble the object, which is not
+    practical for some use cases, such as CDN origination.
+  </para>
+  <para>
+    In order to eliminate any barrier to entry for clients wanting to
+    store objects larger than 5GB, initially we also prototyped fully
+    transparent support for large object uploads. A fully transparent
+    implementation would support a larger max size by automatically
+    splitting objects into segments during upload within the proxy
+    without any changes to the client API. All segments were completely
+    hidden from the client API.
+  </para>
+  <para>
+    This solution introduced a number of challenging failure conditions
+    into the cluster, wouldn't provide the client with any option to do
+    parallel uploads, and had no basis for a resume feature. The
+    transparent implementation was deemed just too complex for the
+    benefit.
+  </para>
+  <para>
+    The current &quot;user manifest&quot; design was chosen in order to
+    provide a transparent download of large objects to the client and
+    still provide the uploading client a clean API to support segmented
+    uploads.
+  </para>
+  <para>
+    To meet an many use cases as possible swift supports two types of
+    large object manifests. Dynamic and static large object manifests
+    both support the same idea of allowing the user to upload many
+    segments to be later downloaded as a single file.
+  </para>
+  <para>
+    Dynamic large objects rely on a container lising to provide the
+    manifest. This has the advantage of allowing the user to add/removes
+    segments from the manifest at any time. It has the disadvantage of
+    relying on eventually consistent container listings. All three
+    copies of the container dbs must be updated for a complete list to
+    be guaranteed. Also, all segments must be in a single container,
+    which can limit concurrent upload speed.
+  </para>
+  <para>
+    Static large objects rely on a user provided manifest file. A user
+    can upload objects into multiple containers and then reference those
+    objects (segments) in a self generated manifest file. Future GETs to
+    that file will download the concatenation of the specified segments.
+    This has the advantage of being able to immediately download the
+    complete object once the manifest has been successfully PUT. Being
+    able to upload segments into separate containers also improves
+    concurrent upload speed. It has the disadvantage that the manifest
+    is finalized once PUT. Any changes to it means it has to be
+    replaced.
+  </para>
+  <para>
+    Between these two methods the user has great flexibility in how
+    (s)he chooses to upload and retrieve large objects to swift. Swift
+    does not, however, stop the user from harming themselves. In both
+    cases the segments are deletable by the user at any time. If a
+    segment was deleted by mistake, a dynamic large object, having no
+    way of knowing it was ever there, would happily ignore the deleted
+    file and the user will get an incomplete file. A static large object
+    would, when failing to retrieve the object specified in the
+    manifest, drop the connection and the user would receive partial
+    results.
+  </para>
+</section>
+</section>

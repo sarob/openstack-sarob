@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Property-Protections">
+<title>Property Protections</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  There are two types of image properties in Glance:
+</para>
+<itemizedlist>
+  <listitem>
+    <para>
+      Core Properties, as specified by the image schema.
+    </para>
+  </listitem>
+  <listitem>
+    <para>
+      Meta Properties, which are arbitrary key/value pairs that can be
+      added to an image.
+    </para>
+  </listitem>
+</itemizedlist>
+<para>
+  Access to meta properties through Glance's public API calls may be
+  restricted to certain sets of users, using a property protections
+  configuration file.
+</para>
+<para>
+  This document explains exactly how property protections are configured
+  and what they apply to.
+</para>
+</section>
+<section xml:id="constructing-a-property-protections-configuration-file">
+  <title>Constructing a Property Protections Configuration File</title>
+  <para>
+    A property protections configuration file follows the format of the
+    Glance API configuration file, which consists of sections, led by a
+    <literal>[section]</literal> header and followed by
+    <literal>name = value</literal> entries. Each section header is a
+    regular expression matching a set of properties to be protected.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      Section headers must compile to a valid regular expression,
+      otherwise a <emphasis role="strong">500 Internal Server
+      Error</emphasis> will be thrown on server startup. Regular
+      expressions will be handled by python's re module which is PERL
+      like.
+    </para>
+  </blockquote>
+  <para>
+    Each section describes four key-value pairs, where the key is one of
+    <literal>create/read/update/delete</literal>, and the value is a
+    comma separated list of user roles that are permitted to perform
+    that operation in the Glance API.
+  </para>
+  <para>
+    The path to the file should be specified in the
+    <literal>[DEFAULT]</literal> section of
+    <literal>glance-api.conf</literal> as follows.
+  </para>
+  <blockquote>
+    <programlisting>
+property_protection_file=/path/to/file
+</programlisting>
+  </blockquote>
+  <para>
+    If this config value is not specified, property protections are not
+    enforced. If the path is invalid, a <emphasis role="strong">500
+    Internal Server Error</emphasis> will be thrown on server startup.
+  </para>
+  <para>
+    Property protections are applied in the order specified in the
+    configuration file. This means that if for example you specify a
+    section with <literal>[.*]</literal> at the top of the file, all
+    proceeding sections will be ignored.
+  </para>
+  <para>
+    If a property does not match any of the given rules, all operations
+    will be disabled for all roles.
+  </para>
+  <para>
+    If an operation is misspelled or omitted, that operation will be
+    disabled for all roles.
+  </para>
+  <para>
+    Disallowing <literal>read</literal> operations will also disallow
+    <literal>update/delete</literal> operations.
+  </para>
+  <para>
+    A successful HTTP request will return status
+    <literal>200 OK</literal>. If the user is not permitted to perform
+    the requested action, <literal>403 Forbidden</literal> will be
+    returned.
+  </para>
+</section>
+<section xml:id="v1-api-x-glance-registry-purge-props">
+  <title>V1 API X-glance-registry-Purge-props</title>
+  <para>
+    Property protections will still be honoured if
+    <literal>X-glance-registry-Purge-props</literal> is set to
+    <literal>True</literal>. That is, if you request to modify
+    properties with this header set to <literal>True</literal>, you will
+    not be able to delete or update properties for which you do not have
+    the relevant permissions. Properties which are not included in the
+    request and for which you do have delete permissions will still be
+    removed.
+  </para>
+</section>
+<section xml:id="examples">
+  <title>Examples</title>
+  <para>
+    <emphasis role="strong">Example 1</emphasis>. Limit all property
+    interactions to admin only.
+  </para>
+  <blockquote>
+    <programlisting>
+[.*]
+create = admin
+read = admin
+update = admin
+delete = admin
+</programlisting>
+  </blockquote>
+  <para>
+    <emphasis role="strong">Example 2</emphasis>. Allow both admins and
+    users with the billing role to read and modify properties prefixed
+    with <literal>x_billing_code_</literal>. Allow admins to read and
+    modify any properties.
+  </para>
+  <blockquote>
+    <programlisting>
+[^x_billing_code_.*]
+create = admin,billing
+read = admin, billing
+update = admin,billing
+delete = admin,billing
+
+[.*]
+create = admin
+read = admin
+update = admin
+delete = admin
+</programlisting>
+  </blockquote>
+</section>
+</section>

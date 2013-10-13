@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Rate-Limiting">
+<title>Rate Limiting</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Rate limiting in swift is implemented as a pluggable middleware. Rate
+  limiting is performed on requests that result in database writes to
+  the account and container sqlite dbs. It uses memcached and is
+  dependent on the proxy servers having highly synchronized time. The
+  rate limits are limited by the accuracy of the proxy server clocks.
+</para>
+</section>
+<section xml:id="configuration">
+  <title>Configuration</title>
+  <para>
+    All configuration is optional. If no account or container limits are
+    provided there will be no rate limiting. Configuration available:
+  </para>
+  <informaltable>
+    <tgroup cols="3">
+      <colspec align="left" />
+      <colspec align="left" />
+      <colspec align="left" />
+      <thead>
+        <row>
+          <entry>
+            Option
+          </entry>
+          <entry>
+            Default
+          </entry>
+          <entry>
+            Description
+          </entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>
+            clock_accuracy
+          </entry>
+          <entry>
+            1000
+          </entry>
+          <entry>
+            Represents how accurate the proxy
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            servers' system clocks are with each
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            other. 1000 means that all the
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            proxies' clock are accurate to each
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            other within 1 millisecond. No
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            ratelimit should be higher than the
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            clock accuracy.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            max_sleep_time_seconds
+          </entry>
+          <entry>
+            60
+          </entry>
+          <entry>
+            App will immediately return a 498
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            response if the necessary sleep time
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            ever exceeds the given
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            max_sleep_time_seconds.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            log_sleep_time_seconds
+          </entry>
+          <entry>
+            0
+          </entry>
+          <entry>
+            To allow visibility into rate limiting
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            set this value &gt; 0 and all sleeps
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            greater than the number will be
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            logged.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            rate_buffer_seconds
+          </entry>
+          <entry>
+            5
+          </entry>
+          <entry>
+            Number of seconds the rate counter can
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            drop and be allowed to catch up (at a
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            faster than listed rate). A larger
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            number will result in larger spikes in
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            rate but better average accuracy.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            account_ratelimit
+          </entry>
+          <entry>
+            0
+          </entry>
+          <entry>
+            If set, will limit PUT and DELETE
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            requests to
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            /account_name/container_name. Number
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            is in requests per second.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            account_whitelist
+          </entry>
+          <entry>
+            ''
+          </entry>
+          <entry>
+            Comma separated lists of account names
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            that will not be rate limited.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            account_blacklist
+          </entry>
+          <entry>
+            ''
+          </entry>
+          <entry>
+            Comma separated lists of account names
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            that will not be allowed. Returns a
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            497 response.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            container_ratelimit_size
+          </entry>
+          <entry>
+            ''
+          </entry>
+          <entry>
+            When set with container_ratelimit_x =
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            r: for containers of size x, limit
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            requests per second to r. Will limit
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            PUT, DELETE, and POST requests to
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            /a/c/o.
+          </entry>
+        </row>
+        <row>
+          <entry>
+            container_listing_ratelimit_size
+          </entry>
+          <entry>
+            ''
+          </entry>
+          <entry>
+            When set with
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            container_listing_ratelimit_x = r: for
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            containers of size x, limit listing
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            requests per second to r. Will limit
+          </entry>
+        </row>
+        <row>
+          <entry>
+          </entry>
+          <entry>
+          </entry>
+          <entry>
+            GET requests to /a/c.
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+  <para>
+    The container rate limits are linearly interpolated from the values
+    given. A sample container rate limiting could be:
+  </para>
+  <para>
+    container_ratelimit_100 = 100
+  </para>
+  <para>
+    container_ratelimit_200 = 50
+  </para>
+  <para>
+    container_ratelimit_500 = 20
+  </para>
+  <para>
+    This would result in
+  </para>
+  <informaltable>
+    <tgroup cols="2">
+      <colspec align="left" />
+      <colspec align="left" />
+      <thead>
+        <row>
+          <entry>
+            Container Size
+          </entry>
+          <entry>
+            Rate Limit
+          </entry>
+        </row>
+      </thead>
+      <tbody>
+        <row>
+          <entry>
+            0-99
+          </entry>
+          <entry>
+            No limiting
+          </entry>
+        </row>
+        <row>
+          <entry>
+            100
+          </entry>
+          <entry>
+            100
+          </entry>
+        </row>
+        <row>
+          <entry>
+            150
+          </entry>
+          <entry>
+            75
+          </entry>
+        </row>
+        <row>
+          <entry>
+            500
+          </entry>
+          <entry>
+            20
+          </entry>
+        </row>
+        <row>
+          <entry>
+            1000
+          </entry>
+          <entry>
+            20
+          </entry>
+        </row>
+      </tbody>
+    </tgroup>
+  </informaltable>
+</section>
+</section>

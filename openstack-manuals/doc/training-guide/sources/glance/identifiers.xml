@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Image-Identifiers">
+<title>Image Identifiers</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Images are uniquely identified by way of a URI that matches the
+  following signature:
+</para>
+<programlisting>
+&lt;Glance Server Location&gt;/v1/images/&lt;ID&gt;
+</programlisting>
+<para>
+  where &lt;Glance Server Location&gt; is the resource location of the
+  Glance service that knows about an image, and &lt;ID&gt; is the
+  image's identifier. Image identifiers in Glance are
+  <emphasis>uuids</emphasis>, making them <emphasis>globally
+  unique</emphasis>.
+</para>
+</article>
+</section>

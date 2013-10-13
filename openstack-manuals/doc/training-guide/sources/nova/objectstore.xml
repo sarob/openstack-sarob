@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Objectstore---File-Storage-Service">
+<title>Objectstore - File Storage Service</title>
+<section xml:id="the-nova.objectstore.handler-module">
+  <title>The nova.objectstore.handler Module</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  </para>
+</sect1>
+</section>
+<section xml:id="the-nova.objectstore.bucket-module">
+  <title>The nova.objectstore.bucket Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.objectstore.stored-module">
+  <title>The nova.objectstore.stored Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-nova.objecstore.image-module">
+  <title>The nova.objecstore.image Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-objectstore_unittest-module">
+    <title>The objectstore_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

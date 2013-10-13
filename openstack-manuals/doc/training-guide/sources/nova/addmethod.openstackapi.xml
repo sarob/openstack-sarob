@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Adding-a-Method-to-the-OpenStack-API">
+<title>Adding a Method to the OpenStack API</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The interface is a mostly RESTful API. REST stands for
+  Representational State Transfer and provides an architecture
+  &quot;style&quot; for distributed systems using HTTP for transport.
+  Figure out a way to express your request and response in terms of
+  resources that are being created, modified, read, or destroyed.
+</para>
+</section>
+<section xml:id="routing">
+  <title>Routing</title>
+  <para>
+    To map URLs to controllers+actions, OpenStack uses the Routes
+    package, a clone of Rails routes for Python implementations. See
+    <link xlink:href="http://routes.groovie.org/">http://routes.groovie.org/</link>
+    for more information.
+  </para>
+  <para>
+    URLs are mapped to &quot;action&quot; methods on
+    &quot;controller&quot; classes in
+    <literal>nova/api/openstack/__init__/ApiRouter.__init__</literal> .
+  </para>
+  <variablelist>
+    <varlistentry>
+      <term>
+        See
+        <link xlink:href="http://routes.groovie.org/manual.html">http://routes.groovie.org/manual.html</link>
+        for all syntax, but you'll probably just need these two:
+      </term>
+      <listitem>
+        <itemizedlist>
+          <listitem>
+            <para>
+              mapper.connect() lets you map a single URL to a single
+              action on a controller.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              mapper.resource() connects many standard URLs to actions
+              on a controller.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+</section>
+<section xml:id="controllers-and-actions">
+  <title>Controllers and actions</title>
+  <para>
+    Controllers live in <literal>nova/api/openstack</literal>, and
+    inherit from nova.wsgi.Controller.
+  </para>
+  <para>
+    See <literal>nova/api/openstack/compute/servers.py</literal> for an
+    example.
+  </para>
+  <para>
+    Action methods take parameters that are sucked out of the URL by
+    mapper.connect() or .resource(). The first two parameters are self
+    and the WebOb request, from which you can get the req.environ,
+    req.body, req.headers, etc.
+  </para>
+</section>
+<section xml:id="serialization">
+  <title>Serialization</title>
+  <para>
+    Actions return a dictionary, and wsgi.Controller serializes that to
+    JSON or XML based on the request's content-type.
+  </para>
+  <para>
+    If you define a new controller, you'll need to define a
+    <literal>_serialization_metadata</literal> attribute on the class,
+    to tell wsgi.Controller how to convert your dictionary to XML. It
+    needs to know the singular form of any list tag (e.g.
+    <literal>&lt;servers&gt;</literal> list contains
+    <literal>&lt;server&gt;</literal> tags) and which dictionary keys
+    are to be XML attributes as opposed to subtags (e.g.
+    <literal>&lt;server id=&quot;4&quot;/&gt;</literal> instead of
+    <literal>&lt;server&gt;&lt;id&gt;4&lt;/id&gt;&lt;/server&gt;</literal>).
+  </para>
+  <para>
+    See nova/api/openstack/compute/servers.py for an example.
+  </para>
+</section>
+<section xml:id="faults">
+  <title>Faults</title>
+  <para>
+    If you need to return a non-200, you should return
+    faults.Fault(webob.exc.HTTPNotFound()) replacing the exception as
+    appropriate.
+  </para>
+</section>
+</section>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Threading-model">
+<title>Threading model</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  All OpenStack services use <emphasis>green thread</emphasis> model of
+  threading, implemented through using the Python
+  <ulink url="http://eventlet.net/">eventlet</ulink> and
+  <ulink url="http://packages.python.org/greenlet/">greenlet</ulink>
+  libraries.
+</para>
+<para>
+  Green threads use a cooperative model of threading: thread context
+  switches can only occur when specific eventlet or greenlet library
+  calls are made (e.g., sleep, certain I/O calls). From the operating
+  system's point of view, each OpenStack service runs in a single
+  thread.
+</para>
+<para>
+  The use of green threads reduces the likelihood of race conditions,
+  but does not completely eliminate them. In some cases, you may need to
+  use the <literal>@lockutils.synchronized(...)</literal> decorator to
+  avoid races.
+</para>
+<para>
+  In addition, since there is only one operating system thread, a call
+  that blocks that main thread will block the entire process.
+</para>
+</section>
+<section xml:id="yielding-the-thread-in-long-running-tasks">
+  <title>Yielding the thread in long-running tasks</title>
+  <para>
+    If a code path takes a long time to execute and does not contain any
+    methods that trigger an eventlet context switch, the long-running
+    thread will block any pending threads.
+  </para>
+  <para>
+    This scenario can be avoided by adding calls to the eventlet sleep
+    method in the long-running code path. The sleep call will trigger a
+    context switch if there are pending threads, and using an argument
+    of 0 will avoid introducing delays in the case that there is only a
+    single green thread:
+  </para>
+  <programlisting>
+from eventlet import greenthread
+...
+greenthread.sleep(0)
+</programlisting>
+</section>
+<section xml:id="mysql-access-and-eventlet">
+  <title>MySQL access and eventlet</title>
+  <para>
+    Queries to the MySQL database will block the main thread of a
+    service. This is because OpenStack services use an external C
+    library for accessing the MySQL database. Since eventlet cannot use
+    monkey-patching to intercept blocking calls in a C library, the
+    resulting database query blocks the thread.
+  </para>
+  <para>
+    The Diablo release contained a thread-pooling implementation that
+    did not block, but this implementation resulted in a
+    <link xlink:href="https://bugs.launchpad.net/nova/+bug/838581">bug</link>
+    and was removed.
+  </para>
+  <para>
+    See this
+    <link xlink:href="https://lists.launchpad.net/openstack/msg08118.html">mailing
+    list thread</link> for a discussion of this issue, including a
+    discussion of the
+    <link xlink:href="https://lists.launchpad.net/openstack/msg08217.html">impact
+    on performance</link>.
+  </para>
+</section>
+</section>

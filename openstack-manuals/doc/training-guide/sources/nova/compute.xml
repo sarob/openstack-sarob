@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Virtualization">
+<title>Virtualization</title>
+<section xml:id="compute">
+  <title>Compute</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Documentation for the compute manager and related files. For reading
+    about a specific virtualization backend, read Drivers_.
+  </para>
+</section>
+<section xml:id="the-nova.compute.manager-module">
+    <title>The nova.compute.manager Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.virt.connection-module">
+    <title>The nova.virt.connection Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.compute.disk-module">
+    <title>The nova.compute.disk Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.virt.images-module">
+    <title>The nova.virt.images Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.compute.flavors-module">
+    <title>The nova.compute.flavors Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.compute.power_state-module">
+    <title>The nova.compute.power_state Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="drivers">
+  <title>Drivers</title>
+<section xml:id="the-nova.virt.libvirt_conn-driver">
+    <title>The nova.virt.libvirt_conn Driver</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.virt.xenapi-driver">
+    <title>The nova.virt.xenapi Driver</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.virt.fake-driver">
+    <title>The nova.virt.fake Driver</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-compute_unittest-module">
+    <title>The compute_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-virt_unittest-module">
+    <title>The virt_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

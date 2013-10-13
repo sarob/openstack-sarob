@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Setting-Up-a-Development-Environment">
+<title>Setting Up a Development Environment</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  This page describes how to setup a working Python development
+  environment that can be used in developing cinder on Ubuntu, Fedora or
+  Mac OS X. These instructions assume you're already familiar with git.
+  Refer to
+  <ulink url="http://wiki.openstack.org/GettingTheCode">GettingTheCode</ulink>
+  for additional information.
+</para>
+<para>
+  Following these instructions will allow you to run the cinder unit
+  tests. If you want to be able to run cinder (i.e., launch VM
+  instances), you will also need to install libvirt and at least one of
+  the
+  <ulink url="http://wiki.openstack.org/HypervisorSupportMatrix">supported
+  hypervisors</ulink>. Running cinder is currently only supported on
+  Linux, although you can run the unit tests on Mac OS X. See
+  ../quickstart for how to get a working version of OpenStack Compute
+  running as quickly as possible.
+</para>
+</section>
+<section xml:id="virtual-environments">
+  <title>Virtual environments</title>
+  <para>
+    Cinder development uses
+    <link xlink:href="http://pypi.python.org/pypi/virtualenv">virtualenv</link>
+    to track and manage Python dependencies while in development and
+    testing. This allows you to install all of the Python package
+    dependencies in a virtual environment or &quot;virtualenv&quot; (a
+    special subdirectory of your cinder directory), instead of
+    installing the packages at the system level.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      Virtualenv is useful for running the unit tests, but is not
+      typically used for full integration testing or production usage.
+    </para>
+  </blockquote>
+</section>
+<section xml:id="linux-systems">
+  <title>Linux Systems</title>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      This section is tested for Cinder on Ubuntu (12.04-64) and
+      Fedora-based (RHEL 6.1) distributions. Feel free to add notes and
+      change according to your experiences or operating system.
+    </para>
+  </blockquote>
+  <para>
+    Install the prerequisite packages.
+  </para>
+  <para>
+    On Ubuntu:
+  </para>
+  <programlisting>
+sudo apt-get install python-dev libssl-dev python-pip git-core libmysqlclient-dev libpq-dev
+</programlisting>
+  <para>
+    On Fedora-based distributions (e.g., Fedora/RHEL/CentOS/Scientific
+    Linux):
+  </para>
+  <programlisting>
+sudo yum install python-devel openssl-devel python-pip git libmysqlclient-dev libqp-dev
+</programlisting>
+</section>
+<section xml:id="mac-os-x-systems">
+  <title>Mac OS X Systems</title>
+  <para>
+    Install virtualenv:
+  </para>
+  <programlisting>
+sudo easy_install virtualenv
+</programlisting>
+  <para>
+    Check the version of OpenSSL you have installed:
+  </para>
+  <programlisting>
+openssl version
+</programlisting>
+  <para>
+    If you have installed OpenSSL 1.0.0a, which can happen when
+    installing a MacPorts package for OpenSSL, you will see an error
+    when running
+    <literal>cinder.tests.auth_unittest.AuthTestCase.test_209_can_generate_x509</literal>.
+  </para>
+  <para>
+    The stock version of OpenSSL that ships with Mac OS X 10.6 (OpenSSL
+    0.9.8l) or Mac OS X 10.7 (OpenSSL 0.9.8r) works fine with cinder.
+  </para>
+</section>
+<section xml:id="getting-the-code">
+  <title>Getting the code</title>
+  <para>
+    Grab the code from GitHub:
+  </para>
+  <programlisting>
+git clone https://github.com/openstack/cinder.git
+cd cinder
+</programlisting>
+</section>
+<section xml:id="running-unit-tests">
+  <title>Running unit tests</title>
+  <para>
+    The unit tests will run by default inside a virtualenv in the
+    <literal>.venv</literal> directory. Run the unit tests by doing:
+  </para>
+  <programlisting>
+./run_tests.sh
+</programlisting>
+  <para>
+    The first time you run them, you will be asked if you want to create
+    a virtual environment (hit &quot;y&quot;):
+  </para>
+  <programlisting>
+No virtual environment found...create one? (Y/n)
+</programlisting>
+  <para>
+    See unit_tests for more details.
+  </para>
+</section>
+<section xml:id="manually-installing-and-using-the-virtualenv">
+  <title>Manually installing and using the virtualenv</title>
+  <para>
+    You can manually install the virtual environment instead of having
+    <literal>run_tests.sh</literal> do it for you:
+  </para>
+  <programlisting>
+python tools/install_venv.py
+</programlisting>
+  <para>
+    This will install all of the Python packages listed in the
+    <literal>requirements.txt</literal> file into your virtualenv. There
+    will also be some additional packages (pip, setuptools) that are
+    installed by the <literal>tools/install_venv.py</literal> file into
+    the virutalenv.
+  </para>
+  <para>
+    If all goes well, you should get a message something like this:
+  </para>
+  <programlisting>
+Cinder development environment setup is complete.
+</programlisting>
+  <para>
+    To activate the Cinder virtualenv for the extent of your current
+    shell session you can run:
+  </para>
+  <programlisting>
+$ source .venv/bin/activate
+</programlisting>
+  <para>
+    Or, if you prefer, you can run commands in the virtualenv on a case
+    by case basis by running:
+  </para>
+  <programlisting>
+$ tools/with_venv.sh &lt;your command&gt;
+</programlisting>
+</section>
+<section xml:id="contributing-your-work">
+  <title>Contributing Your Work</title>
+  <para>
+    Once your work is complete you may wish to contribute it to the
+    project. Add your name and email address to the
+    <literal>Authors</literal> file, and also to the
+    <literal>.mailmap</literal> file if you use multiple email
+    addresses. Your contributions can not be merged into trunk unless
+    you are listed in the Authors file. Cinder uses the Gerrit code
+    review system. For information on how to submit your branch to
+    Gerrit, see
+    <link xlink:href="http://wiki.openstack.org/GerritWorkflow">GerritWorkflow</link>.
+  </para>
+</section>
+</section>

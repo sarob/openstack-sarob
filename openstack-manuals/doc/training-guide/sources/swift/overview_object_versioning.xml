@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Object-Versioning">
+<title>Object Versioning</title>
+<section xml:id="overview">
+  <title>Overview</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Object versioning in swift is implemented by setting a flag on the
+    container to tell swift to version all objects in the container. The
+    flag is the <literal>X-Versions-Location</literal> header on the
+    container, and its value is the container where the versions are
+    stored. It is recommended to use a different
+    <literal>X-Versions-Location</literal> container for each container
+    that is being versioned.
+  </para>
+  <para>
+    When data is <literal>PUT</literal> into a versioned container (a
+    container with the versioning flag turned on), the existing data in
+    the file is redirected to a new object and the data in the
+    <literal>PUT</literal> request is saved as the data for the
+    versioned object. The new object name (for the previous version) is
+    <literal>&lt;versions_container&gt;/&lt;length&gt;&lt;object_name&gt;/&lt;timestamp&gt;</literal>,
+    where <literal>length</literal> is the 3-character zero-padded
+    hexidecimal length of the <literal>&lt;object_name&gt;</literal> and
+    <literal>&lt;timestamp&gt;</literal> is the timestamp of when the
+    previous version was created.
+  </para>
+  <para>
+    A <literal>GET</literal> to a versioned object will return the
+    current version of the object without having to do any request
+    redirects or metadata lookups.
+  </para>
+  <para>
+    A <literal>POST</literal> to a versioned object will update the
+    object metadata as normal, but will not create a new version of the
+    object. In other words, new versions are only created when the
+    content of the object changes.
+  </para>
+  <para>
+    A <literal>DELETE</literal> to a versioned object will only remove
+    the current version of the object. If you have 5 total versions of
+    the object, you must delete the object 5 times to completely remove
+    the object.
+  </para>
+  <para>
+    Note: A large object manifest file cannot be versioned, but a large
+    object manifest may point to versioned segments.
+  </para>
+</sect1>
+</section>
+<section xml:id="how-to-enable-object-versioning-in-a-swift-cluster">
+  <title>How to Enable Object Versioning in a Swift Cluster</title>
+  <para>
+    Set <literal>allow_versions</literal> to <literal>True</literal> in
+    the container server config.
+  </para>
+</section>
+<section xml:id="examples-using-curl">
+  <title>Examples Using <literal>curl</literal></title>
+  <para>
+    First, create a container with the
+    <literal>X-Versions-Location</literal> header or add the header to
+    an existing container. Also make sure the container referenced by
+    the <literal>X-Versions-Location</literal> exists. In this example,
+    the name of that container is &quot;versions&quot;:
+  </para>
+  <programlisting>
+curl -i -XPUT -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    -H &quot;X-Versions-Location: versions&quot; http://&lt;storage_url&gt;/container
+curl -i -XPUT -H &quot;X-Auth-Token: &lt;token&gt;&quot; http://&lt;storage_url&gt;/versions
+</programlisting>
+  <para>
+    Create an object (the first version):
+  </para>
+  <programlisting>
+curl -i -XPUT --data-binary 1 -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    http://&lt;storage_url&gt;/container/myobject
+</programlisting>
+  <para>
+    Now create a new version of that object:
+  </para>
+  <programlisting>
+curl -i -XPUT --data-binary 2 -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    http://&lt;storage_url&gt;/container/myobject
+</programlisting>
+  <para>
+    See a listing of the older versions of the object:
+  </para>
+  <programlisting>
+curl -i -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    http://&lt;storage_url&gt;/versions?prefix=008myobject/
+</programlisting>
+  <para>
+    Now delete the current version of the object and see that the older
+    version is gone:
+  </para>
+  <programlisting>
+curl -i -XDELETE -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    http://&lt;storage_url&gt;/container/myobject
+curl -i -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    http://&lt;storage_url&gt;/versions?prefix=008myobject/
+</programlisting>
+</section>
+<section xml:id="how-to-disable-object-versioning-in-a-swift-cluster">
+  <title>How to Disable Object Versioning in a Swift Cluster</title>
+  <para>
+    If you want to disable all functionality, set
+    <literal>allow_versions</literal> back to <literal>False</literal>
+    in the container server config.
+  </para>
+  <para>
+    Disable versioning a versioned container (x is any value except
+    empty):
+  </para>
+  <programlisting>
+curl -i -HPOST -H &quot;X-Auth-Token: &lt;token&gt;&quot; \
+    -H &quot;X-Remove-Versions-Location: x&quot; http://&lt;storage_url&gt;/container
+</programlisting>
+</section>
+</section>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Horizon's-tests-and-you">
+<title>Horizon's tests and you</title>
+<section xml:id="how-to-run-the-tests">
+  <title>How to run the tests</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Because Horizon is composed of both the <literal>horizon</literal>
+    app and the <literal>openstack-dashboard</literal> reference
+    project, there are in fact two sets of unit tests. While they can be
+    run individually without problem, there is an easier way:
+  </para>
+  <para>
+    Included at the root of the repository is the
+    <literal>run_tests.sh</literal> script which invokes both sets of
+    tests, and optionally generates analyses on both components in the
+    process. This script is what what Jenkins uses to verify the
+    stability of the project, so you should make sure you run it and it
+    passes before you submit any pull requests/patches.
+  </para>
+  <para>
+    To run the tests:
+  </para>
+  <programlisting>
+$ ./run_tests.sh
+</programlisting>
+  <para>
+    It's also possible to
+    run a subset of unit tests&lt;ref/run_tests&gt;.
+  </para>
+</sect1>
+</section>
+<section xml:id="writing-tests">
+  <title>Writing tests</title>
+  <para>
+    Horizon uses Django's unit test machinery (which extends Python's
+    <literal>unittest2</literal> library) as the core of its test suite.
+    As such, all tests for the Python code should be written as unit
+    tests. No doctests please.
+  </para>
+  <para>
+    In general new code without unit tests will not be accepted, and
+    every bugfix <emphasis>must</emphasis> include a regression test.
+  </para>
+  <para>
+    For a much more in-depth discussion of testing, see the
+    testing topic
+    guide &lt;/topics/testing&gt;.
+  </para>
+</section>
+</section>

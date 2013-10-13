@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Horizon-Quickstart">
+<title>Horizon Quickstart</title>
+<section xml:id="setup">
+  <title>Setup</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    To setup an Horizon development environment simply clone the Horizon
+    git repository from
+    <ulink url="http://github.com/openstack/horizon">http://github.com/openstack/horizon</ulink>
+    and execute the <literal>run_tests.sh</literal> script from the root
+    folder (see ref/run_tests):
+  </para>
+  <programlisting>
+&gt; git clone https://github.com/openstack/horizon.git
+&gt; cd horizon
+&gt; ./run_tests.sh
+</programlisting>
+  <para>
+    Next you will need to setup your Django application config by
+    copying
+    <literal>openstack_dashboard/local/local_settings.py.example</literal>
+    to <literal>openstack_dashboard/local_settings.py</literal>. To do
+    this quickly you can use the following command:
+  </para>
+  <programlisting>
+&gt; cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
+</programlisting>
+  <para>
+    Horizon assumes a single end-point for OpenStack services which
+    defaults to the local host (127.0.0.1). If this is not the case
+    change the <literal>OPENSTACK_HOST</literal> setting in the
+    <literal>openstack_dashboard/local/local_settings.py</literal> file,
+    to the actual IP address of the OpenStack end-point Horizon should
+    use.
+  </para>
+  <para>
+    To start the Horizon development server use the Django
+    <literal>manage.py</literal> utility with the context of the virtual
+    environment:
+  </para>
+  <programlisting>
+&gt; tools/with_venv.sh ./manage.py runserver
+</programlisting>
+  <para>
+    Alternately specify the listen IP and port:
+  </para>
+  <programlisting>
+&gt; tools/with_venv.sh ./manage.py runserver 0.0.0.0:8080
+</programlisting>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      If you would like to run commands without the prefix of
+      <literal>tools/with_venv.sh</literal> you may source your
+      environment directly. This will remain active as long as your
+      shell session stays open:
+    </para>
+    <para>
+      &gt; source .venv/bin/activate
+    </para>
+  </blockquote>
+  <para>
+    Once the Horizon server is running point a web browser to
+    <ulink url="http://localhost:8000">http://localhost:8000</ulink> or
+    to the IP and port the server is listening for.
+  </para>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      The <literal>DevStack</literal> project
+      (<ulink url="http://devstack.org/">http://devstack.org/</ulink>)
+      can be used to install an OpenStack development environment from
+      scratch.
+    </para>
+  </blockquote>
+  <blockquote>
+    <para>
+      <emphasis role="strong">note</emphasis>
+    </para>
+    <para>
+      The minimum required set of OpenStack services running includes
+      the following:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Nova (compute, api, scheduler, and network)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Glance
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Keystone
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Optional support is provided for Swift.
+    </para>
+  </blockquote>
+</sect1>
+</section>
+<section xml:id="horizons-structure">
+  <title>Horizon's Structure</title>
+  <para>
+    This project is a bit different from other OpenStack projects in
+    that it has two very distinct components underneath it:
+    <literal>horizon</literal>, and
+    <literal>openstack_dashboard</literal>.
+  </para>
+  <para>
+    The <literal>horizon</literal> directory holds the generic libraries
+    and components that can be used in any Django project.
+  </para>
+  <para>
+    The <literal>openstack_dashboard</literal> directory contains a
+    reference Django project that uses <literal>horizon</literal>.
+  </para>
+  <para>
+    For development, both pieces share an environment which (by default)
+    is built with the <literal>tools/install_venv.py</literal> script.
+    That script creates a virtualenv and installs all the necessary
+    packages.
+  </para>
+  <para>
+    If dependencies are added to either <literal>horizon</literal> or
+    <literal>openstack_dashboard</literal>, they should be added to
+    <literal>requirements.txt</literal>.
+  </para>
+  <blockquote>
+    <blockquote>
+      <para>
+        <emphasis role="strong">important</emphasis>
+      </para>
+      <para>
+        If you do anything which changes the environment (adding new
+        dependencies or renaming directories are both great examples) be
+        sure to increment the <literal>environment_version</literal>
+        counter in run_tests.sh &lt;ref/run_tests&gt;.
+      </para>
+    </blockquote>
+  </blockquote>
+</section>
+<section xml:id="project">
+  <title>Project</title>
+<section xml:id="installed_apps">
+    <title>INSTALLED_APPS</title>
+    <para>
+      At the project level you add Horizon and any desired dashboards to
+      your <literal>settings.INSTALLED_APPS</literal>:
+    </para>
+    <programlisting>
+INSTALLED_APPS = (
+    'openstack_dashboard',
+    ...
+    'horizon',
+    'openstack_dashboard.dashboards.project',
+    'openstack_dashboard.dashboards.admin',
+    'openstack_dashboard.dashboards.settings',
+    ...
+)
+</programlisting>
+</section>
+<section xml:id="urls">
+    <title>URLs</title>
+    <para>
+      Then you add a single line to your project's
+      <literal>urls.py</literal>:
+    </para>
+    <programlisting>
+url(r'', include(horizon.urls)),
+</programlisting>
+    <para>
+      Those urls are automatically constructed based on the registered
+      Horizon apps. If a different URL structure is desired it can be
+      constructed by hand.
+    </para>
+</section>
+<section xml:id="templates">
+    <title>Templates</title>
+    <para>
+      Pre-built template tags generate navigation. In your
+      <literal>nav.html</literal> template you might have the following:
+    </para>
+    <programlisting>
+{% load horizon %}
+
+&lt;div class='nav'&gt;
+    {% horizon_main_nav %}
+&lt;/div&gt;
+</programlisting>
+    <para>
+      And in your <literal>sidebar.html</literal> you might have:
+    </para>
+    <programlisting>
+{% load horizon %}
+
+&lt;div class='sidebar'&gt;
+    {% horizon_dashboard_nav %}
+&lt;/div&gt;
+</programlisting>
+    <para>
+      These template tags are aware of the current &quot;active&quot;
+      dashboard and panel via template context variables and will render
+      accordingly.
+    </para>
+</section>
+</section>
+<section xml:id="application">
+  <title>Application</title>
+<section xml:id="structure">
+    <title>Structure</title>
+    <para>
+      An application would have the following structure (we'll use
+      syspanel as an example):
+    </para>
+    <programlisting>
+project/
+|---__init__.py
+|---dashboard.py &lt;-----Registers the app with Horizon and sets dashboard properties
+|---overview/
+|---images_and_snapshots/
+    |-- images
+    |-- __init__.py
+    |---panel.py &lt;-----Registers the panel in the app and defines panel properties
+    |-- snapshots/
+    |-- templates/
+    |-- tests.py
+    |-- urls.py
+    |-- views.py
+    ...
+...
+</programlisting>
+</section>
+<section xml:id="dashboard-classes">
+    <title>Dashboard Classes</title>
+    <para>
+      Inside of <literal>dashboard.py</literal> you would have a class
+      definition and the registration process:
+    </para>
+    <programlisting>
+import horizon
+
+....
+# ObjectStorePanels is an example for a PanelGroup
+# for panel classes in general, see below
+class ObjectStorePanels(horizon.PanelGroup):
+    slug = &quot;object_store&quot;
+    name = _(&quot;Object Store&quot;)
+    panels = ('containers',)
+
+
+class Project(horizon.Dashboard):
+    name = _(&quot;Project&quot;) # Appears in navigation
+    slug = &quot;project&quot;    # Appears in URL
+    # panels may be strings or refer to classes, such as
+    # ObjectStorePanels
+    panels = (BasePanels, NetworkPanels, ObjectStorePanels)
+    default_panel = 'overview'
+    supports_tenants = True
+    ...
+
+horizon.register(Project)
+</programlisting>
+</section>
+<section xml:id="panel-classes">
+    <title>Panel Classes</title>
+    <para>
+      To connect a ~horizon.Panel with a ~horizon.Dashboard class you
+      register it in a <literal>panels.py</literal> file like so:
+    </para>
+    <programlisting>
+import horizon
+
+from openstack_dashboard.dashboards.project import dashboard
+
+
+class Images(horizon.Panel):
+    name = &quot;Images&quot;
+    slug = 'images'
+    permissions = ('openstack.roles.admin', 'my.other.permission',)
+
+
+# You could also register your panel with another application's dashboard
+dashboard.Project.register(Images)
+</programlisting>
+    <para>
+      By default a ~horizon.Panel class looks for a
+      <literal>urls.py</literal> file in the same directory as
+      <literal>panel.py</literal> to include in the rollup of url
+      patterns from panels to dashboards to Horizon, resulting in a
+      wholly extensible, configurable URL structure.
+    </para>
+</section>
+</section>
+</section>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Common-and-Misc-Libraries">
+<title>Common and Misc Libraries</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Libraries common throughout Cinder or just ones that haven't been
+  categorized very well yet.
+</para>
+</section>
+<section xml:id="the-cinder.adminclient-module">
+  <title>The cinder.adminclient Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.context-module">
+  <title>The cinder.context Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.exception-module">
+  <title>The cinder.exception Module</title>
+  <para>
+    The cinder.common.config Module ------------------------------
+  </para>
+</section>
+<section xml:id="the-cinder.process-module">
+  <title>The cinder.process Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.rpc-module">
+  <title>The cinder.rpc Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.server-module">
+  <title>The cinder.server Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.test-module">
+  <title>The cinder.test Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.utils-module">
+  <title>The cinder.utils Module</title>
+  <para>
+  </para>
+</section>
+<section xml:idate-module">
+  <title>The cinder.validate Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="the-cinder.wsgi-module">
+  <title>The cinder.wsgi Module</title>
+  <para>
+  </para>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+<section xml:id="the-declare_conf-module">
+    <title>The declare_conf Module</title>
+    <para>
+      The conf_fixture Module ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    </para>
+</section>
+<section xml:id="the-process_unittest-module">
+    <title>The process_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-rpc_unittest-module">
+    <title>The rpc_unittest Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-runtime_conf-module">
+    <title>The runtime_conf Module</title>
+    <para>
+    </para>
+</section>
+<section xml:idator_unittest-module">
+    <title>The validator_unittest Module</title>
+    <para>
+    </para>
+</section>
+</section>
+</section>

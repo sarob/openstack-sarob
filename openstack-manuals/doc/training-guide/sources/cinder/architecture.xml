@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Cinder-System-Architecture">
+<title>Cinder System Architecture</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  The Cinder Block Storage Service is intended to be ran on one or more
+  nodes.
+</para>
+<para>
+  Cinder uses a sql-based central database that is shared by all Cinder
+  services in the system. The amount and depth of the data fits into a
+  sql database quite well. For small deployments this seems like an
+  optimal solution. For larger deployments, and especially if security
+  is a concern, cinder will be moving towards multiple data stores with
+  some kind of aggregation system.
+</para>
+</section>
+<section xml:id="components">
+  <title>Components</title>
+  <para>
+    Below you will a brief explanation of the different components.
+  </para>
+  <programlisting>
+/- ( LDAP )
+</programlisting>
+  <blockquote>
+    <variablelist>
+      <varlistentry>
+        <term>
+          [ Auth Manager ] --- | - ( DB )
+        </term>
+        <listitem>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+  <blockquote>
+    <para>
+      cinderclient |
+    </para>
+  </blockquote>
+  <blockquote>
+    <para>
+      / |
+    </para>
+  </blockquote>
+  <blockquote>
+    <variablelist>
+      <varlistentry>
+        <term>
+          [ Web Dashboard ]- -[ api ] -- &lt; AMQP &gt; -- [ scheduler ]
+          -- [ volume ] -- ( iSCSI )
+        </term>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>
+                / |
+              </term>
+              <listitem>
+                <variablelist>
+                  <varlistentry>
+                    <term>
+                      novaclient |
+                    </term>
+                    <listitem>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+                <blockquote>
+                  <para>
+                    &lt; REST &gt;
+                  </para>
+                </blockquote>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>
+        DB: sql database for data storage. Used by all components (LINKS
+        NOT SHOWN)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Web Dashboard: potential external component that talks to the
+        api
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        api: component that receives http requests, converts commands
+        and communicates with other components via the queue or http
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Auth Manager: component responsible for users/projects/and
+        roles. Can backend to DB or LDAP. This is not a separate binary,
+        but rather a python class that is used by most components in the
+        system.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        scheduler: decides which host gets each volume
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        volume: manages dynamically attachable block devices.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

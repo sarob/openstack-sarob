@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Getting-Started">
+<title>Getting Started</title>
+<section xml:id="system-requirements">
+  <title>System Requirements</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Swift development currently targets Ubuntu Server 10.04, but should
+    work on most Linux platforms with the following software:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Python 2.6
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        rsync 3.0
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    And the following python libraries:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Eventlet 0.9.8
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Setuptools
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Simplejson
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Xattr
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Nose
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Sphinx
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Netifaces
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Dnspython
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Pastedeploy
+      </para>
+    </listitem>
+  </itemizedlist>
+</sect1>
+</section>
+<section xml:id="getting-swift">
+  <title>Getting Swift</title>
+  <para>
+    Swift's source code is hosted on github and managed with git. The
+    current trunk can be checked out like this:
+  </para>
+  <blockquote>
+    <para>
+      <literal>git clone https://github.com/openstack/swift.git</literal>
+    </para>
+  </blockquote>
+  <para>
+    A source tarball for the latest release of Swift is available on the
+    <link xlink:href="https://launchpad.net/swift">launchpad project
+    page</link>.
+  </para>
+  <para>
+    Prebuilt packages for Ubuntu are available starting with Natty, or
+    from PPAs for earlier releases.
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="https://launchpad.net/ubuntu/+source/swift">Swift
+        Ubuntu Packages</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="https://launchpad.net/~swift-core/+archive/release">Swift
+        PPA Archive</link>
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="development">
+  <title>Development</title>
+  <para>
+    To get started with development with Swift, or to just play around,
+    the following docs will be useful:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Swift All in One &lt;development_saio&gt; - Set up a VM with
+        Swift installed
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Development Guidelines &lt;development_guidelines&gt;
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="production">
+  <title>Production</title>
+  <para>
+    If you want to set up and configure Swift for a production cluster,
+    the following doc should be useful:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Multiple Server Swift Installation &lt;howto_installmultinode&gt;
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Policies">
+<title>Policies</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Glance's public API calls may be restricted to certain sets of users
+  using a policy configuration file. This document explains exactly how
+  policies are configured and what they apply to.
+</para>
+<para>
+  A policy is composed of a set of rules that are used by the policy
+  &quot;Brain&quot; in determining if a particular action may be
+  performed by the authorized tenant.
+</para>
+</section>
+<section xml:id="constructing-a-policy-configuration-file">
+  <title>Constructing a Policy Configuration File</title>
+  <para>
+    A policy configuration file is a simply JSON object that contain
+    sets of rules. Each top-level key is the name of a rule. Each rule
+    is a string that describes an action that may be performed in the
+    Glance API.
+  </para>
+  <para>
+    The actions that may have a rule enforced on them are:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>get_images</literal> - List available image entities
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>GET /v1/images</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v1/images/detail</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v2/images</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>get_image</literal> - Retrieve a specific image entity
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>HEAD /v1/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v1/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v2/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>download_image</literal> - Download binary image data
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>GET /v1/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v2/images/&lt;IMAGE_ID&gt;/file</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>add_image</literal> - Create an image entity
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>POST /v1/images</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>POST /v2/images</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>modify_image</literal> - Update an image entity
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>PUT /v1/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>PUT /v2/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>publicize_image</literal> - Create or update images
+        with attribute
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>POST /v1/images</literal> with attribute
+            <literal>is_public</literal> = <literal>true</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>PUT /v1/images/&lt;IMAGE_ID&gt;</literal> with
+            attribute <literal>is_public</literal> =
+            <literal>true</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>POST /v2/images</literal> with attribute
+            <literal>visibility</literal> = <literal>public</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>PUT /v2/images/&lt;IMAGE_ID&gt;</literal> with
+            attribute <literal>visibility</literal> =
+            <literal>public</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>delete_image</literal> - Delete an image entity and
+        associated binary data
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>DELETE /v1/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>DELETE /v2/images/&lt;IMAGE_ID&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>add_member</literal> - Add a membership to the member
+        repo of an image
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>POST /v2/images/&lt;IMAGE_ID&gt;/members</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>get_members</literal> - List the members of an image
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>GET /v1/images/&lt;IMAGE_ID&gt;/members</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>GET /v2/images/&lt;IMAGE_ID&gt;/members</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>delete_member</literal> - Delete a membership of an
+        image
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>DELETE /v1/images/&lt;IMAGE_ID&gt;/members/&lt;MEMBER_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>DELETE /v2/images/&lt;IMAGE_ID&gt;/members/&lt;MEMBER_ID&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>modify_member</literal> - Create or update the
+        membership of an image
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>PUT /v1/images/&lt;IMAGE_ID&gt;/members/&lt;MEMBER_ID&gt;</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>PUT /v1/images/&lt;IMAGE_ID&gt;/members</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>POST /v2/images/&lt;IMAGE_ID&gt;/members</literal>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>PUT /v2/images/&lt;IMAGE_ID&gt;/members/&lt;MEMBER_ID&gt;</literal>
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>manage_image_cache</literal> - Allowed to use the image
+        cache management API
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    To limit an action to a particular role or roles, you list the roles
+    like so :
+  </para>
+  <programlisting>
+{
+  &quot;delete_image&quot;: [&quot;role:admin&quot;, &quot;role:superuser&quot;]
+}
+</programlisting>
+  <para>
+    The above would add a rule that only allowed users that had roles of
+    either &quot;admin&quot; or &quot;superuser&quot; to delete an
+    image.
+  </para>
+</section>
+<section xml:id="examples">
+  <title>Examples</title>
+  <para>
+    Example 1. (The default policy configuration)
+  </para>
+  <blockquote>
+    <programlisting>
+{
+    &quot;default&quot;: []
+}
+</programlisting>
+  </blockquote>
+  <para>
+    Note that an empty JSON list means that all methods of the Glance
+    API are callable by anyone.
+  </para>
+  <para>
+    Example 2. Disallow modification calls to non-admins
+  </para>
+  <blockquote>
+    <programlisting>
+{
+    &quot;default&quot;: [],
+    &quot;add_image&quot;: [&quot;role:admin&quot;],
+    &quot;modify_image&quot;: [&quot;role:admin&quot;],
+    &quot;delete_image&quot;: [&quot;role:admin&quot;]
+}
+</programlisting>
+  </blockquote>
+</section>
+</section>

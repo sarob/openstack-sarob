@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Horizon:-The-OpenStack-Dashboard-Project">
+<title>Horizon: The OpenStack Dashboard Project</title>
+<section xml:id="introduction">
+  <title>Introduction</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    Horizon is the canonical implementation of
+    <ulink url="https://github.com/openstack/horizon">Openstack's
+    Dashboard</ulink>, which provides a web based user interface to
+    OpenStack services including Nova, Swift, Keystone, etc.
+  </para>
+  <para>
+    For a more in-depth look at Horizon and its architecture, see the
+    Introduction to Horizon &lt;intro&gt;.
+  </para>
+  <para>
+    To learn what you need to know to get going, see the quickstart.
+  </para>
+</sect1>
+</section>
+<section xml:id="getting-started-with-horizon">
+  <title>Getting Started With Horizon</title>
+  <para>
+    How to use Horizon in your own projects.
+  </para>
+</section>
+<section xml:id="developer-docs">
+  <title>Developer Docs</title>
+  <para>
+    For those wishing to develop Horizon itself, or go in-depth with
+    building your own ~horizon.Dashboard or ~horizon.Panel classes, the
+    following documentation is provided.
+  </para>
+<section xml:id="general-information">
+    <title>General information</title>
+    <para>
+      Brief guides to areas of interest and importance when developing
+      Horizon.
+    </para>
+</section>
+<section xml:ides">
+    <title>Topic Guides</title>
+    <para>
+      Information on how to work with specific areas of Horizon can be
+      found in the following topic guides.
+    </para>
+</section>
+<section xml:id="api-reference">
+    <title>API Reference</title>
+    <para>
+      In-depth documentation for Horizon and its APIs.
+    </para>
+</section>
+<section xml:id="source-code-reference">
+    <title>Source Code Reference</title>
+    <para>
+      Auto-generated reference for the complete source code.
+    </para>
+</section>
+</section>
+<section xml:id="release-notes">
+  <title>Release Notes</title>
+  <para>
+  </para>
+</section>
+<section xml:id="information">
+  <title>Information</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        genindex
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        modindex
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

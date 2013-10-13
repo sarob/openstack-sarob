@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Installing-Keystone">
+<title>Installing Keystone</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  This document describes how to install Keystone in order to use it. If
+  you are intending to develop on or with Keystone, please read
+  developing and setup.
+</para>
+</section>
+<section xml:id="installing-from-source">
+  <title>Installing from Source</title>
+  <para>
+    The source install instructions specifically avoid using platform
+    specific packages, instead using the source for the code and the
+    Python Package Index
+    (<link xlink:href="http://pypi.python.org/pypi">PyPi</link>).
+  </para>
+  <para>
+    It's expected that your system already has
+    <link xlink:href="http://www.python.org">python</link>,
+    <link xlink:href="http://www.pip-installer.org/en/latest/installing.html">pip</link>,
+    and <link xlink:href="http://git-scm.com/">git</link> available.
+  </para>
+  <para>
+    Clone the keystone repository:
+  </para>
+  <programlisting>
+git clone http://github.com/openstack/keystone.git
+cd keystone
+</programlisting>
+  <para>
+    Install the dependencies to run keystone:
+  </para>
+  <programlisting>
+sudo pip install -r requirements.txt
+</programlisting>
+  <para>
+    And at this point, you should have all the pieces you need to run
+    keystone installed on your system. The following commands should be
+    available on the commandline path:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <literal>keystone</literal> the keystone client, used to
+        configure keystone
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>keystone-manage</literal> used to bootstrap keystone
+        data
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <literal>keystone-all</literal> used to run the keystone
+        services
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    You will find sample configuration files in <literal>etc/</literal>
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        keystone.conf
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        keystone-paste.ini
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        logging.conf
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        policy.json
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        default_catalog.templates
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    From here, refer to configuration to choose which backend drivers to
+    enable and use. Once configured, you should be able to run keystone
+    by issuing the command:
+  </para>
+  <programlisting>
+keystone-all
+</programlisting>
+  <para>
+    which (by default) will show logging on the console from which it
+    was started. Once started, you can initialize data in keystone for
+    use with the rest of openstack, as described in configuringservices.
+  </para>
+  <para>
+    An excellent reference implementation of setting up keystone is
+    <link xlink:href="http://devstack.org/">DEVSTACK</link>, most commonly
+    used for development and testing setup of not only Keystone, but all
+    of the core OpenStack projects.
+  </para>
+  <para>
+    The script with the latest examples of intializing data in Keystone
+    is a bash script called
+    <link xlink:href="https://github.com/openstack-dev/devstack/blob/master/files/keystone_data.sh">keystoneddatassh</link>
+  </para>
+</section>
+<section xml:id="installing-from-packages-ubuntu">
+  <title>Installing from packages: Ubuntu</title>
+  <para>
+    Ubuntu is providing packages for Keystone for Precise. To install
+    keystone on Ubuntu:
+  </para>
+  <programlisting>
+sudo apt-get install keystone
+</programlisting>
+  <para>
+    In using Ubuntu's packages, the packages will set up a user account
+    for the Keystone service (keystone), and place default
+    configurations in <literal>/etc/keystone</literal>. The debian
+    installer will also ask you about configuration options for setting
+    up and running Keystone. As of this writing, the defaults for
+    Keystone backends are all SQL based, stored locally in a sqlite.
+  </para>
+  <para>
+    Once installed, you still need to initialize data in Keystone, which
+    you can find described in configuringservices.
+  </para>
+</section>
+<section xml:id="installing-from-packages-fedora">
+  <title>Installing from packages: Fedora</title>
+  <para>
+    Installing Keystone with Fedora 17 is documented at
+    <link xlink:href="http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17">http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17</link>.
+  </para>
+  <para>
+    To install the packages:
+  </para>
+  <programlisting>
+sudo yum install --enablerepo=updates-testing openstack-keystone
+</programlisting>
+  <para>
+    Once installed, you can configure keystone based on the instructions
+    at:
+  </para>
+  <para>
+    <link xlink:href="http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17#Configuring_Keystone_for_authentication">http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17#Configuring_Keystone_for_authentication</link>
+  </para>
+</section>
+</section>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Running-Keystone-in-HTTPD">
+<title>Running Keystone in HTTPD</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  To run Keystone in HTTPD, first enable SSL support. This is optional,
+  but highly recommended.
+</para>
+<para>
+  Install mod_nss according to your distribution, then apply the
+  following patch and restart HTTPD:
+</para>
+<programlisting>
+--- /etc/httpd/conf.d/nss.conf.orig 2012-03-29 12:59:06.319470425 -0400
++++ /etc/httpd/conf.d/nss.conf  2012-03-29 12:19:38.862721465 -0400
+@@ -17,7 +17,7 @@
+ # Note: Configurations that use IPv6 but not IPv4-mapped addresses need two
+ #       Listen directives: &quot;Listen [::]:8443&quot; and &quot;Listen 0.0.0.0:443&quot;
+ #
+-Listen 8443
++Listen 443
+
+ ##
+ ##  SSL Global Context
+@@ -81,7 +81,7 @@
+ ## SSL Virtual Host Context
+ ##
+
+-&lt;virtualhost _default_:8443=&quot;&quot;&gt;
++&lt;virtualhost _default_:443=&quot;&quot;&gt;
+
+ #   General setup for the virtual host
+ #DocumentRoot &quot;/etc/httpd/htdocs&quot;
+&lt;/virtualhost&gt;&lt;/virtualhost&gt;
+</programlisting>
+</section>
+<section xml:id="firewall">
+  <title>Firewall</title>
+  <para>
+    Add the following rule to IPTables in order to ensure the SSL
+    traffic can pass your firewall:
+  </para>
+  <programlisting>
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+</programlisting>
+  <para>
+    it goes right before:
+  </para>
+  <programlisting>
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+</programlisting>
+</section>
+<section xml:id="files">
+  <title>Files</title>
+  <para>
+    Copy the file httpd/wsgi-keystone.conf to the appropriate location
+    for your apache server, most likely:
+  </para>
+  <programlisting>
+/etc/httpd/conf.d/wsgi-keystone.conf
+</programlisting>
+  <para>
+    Create the directory <literal>/var/www/cgi-bin/keystone/</literal>.
+    You can either hardlink or softlink the files
+    <literal>main</literal> and <literal>admin</literal> to the file
+    <literal>keystone.py</literal> in this directory. For a distribution
+    appropriate place, it should probably be copied to:
+  </para>
+  <programlisting>
+/usr/share/openstack/keystone/httpd/keystone.py
+</programlisting>
+  <para>
+    Keystone's primary configuration file
+    (<literal>etc/keystone.conf</literal>) and the PasteDeploy
+    configuration file (<literal>etc/keystone-paste.ini</literal>) must
+    be readable to HTTPD in one of the default locations described in
+    configuration.
+  </para>
+</section>
+<section xml:id="selinux">
+  <title>SELinux</title>
+  <para>
+    If you are running with SELinux enabled (and you should be) make
+    sure that the file has the appropriate SELinux context to access the
+    linked file. If you have the file in /var/www/cgi-bin, you can do
+    this by running:
+  </para>
+  <programlisting>
+sudo restorecon /var/www/cgi-bin
+</programlisting>
+  <para>
+    Putting it somewhere else requires you set up your SELinux policy
+    accordingly.
+  </para>
+</section>
+<section xml:id="keystone-configuration">
+  <title>Keystone Configuration</title>
+  <para>
+    Make sure you use either the <literal>SQL</literal> or the
+    <literal>memcached</literal> driver for <literal>tokens</literal>,
+    otherwise the tokens will not be shared between the processes of the
+    Apache HTTPD server.
+  </para>
+  <para>
+    For <literal>SQL,</literal> in
+    <literal>/etc/keystone/keystone.conf</literal> make sure you have
+    set:
+  </para>
+  <programlisting>
+[token]
+driver = keystone.token.backends.sql.Token
+</programlisting>
+  <para>
+    For <literal>memcache,</literal> in
+    <literal>/etc/keystone/keystone.conf</literal> make sure you have
+    set:
+  </para>
+  <programlisting>
+[token]
+driver = keystone.token.backends.memcache.Token
+</programlisting>
+  <para>
+    In both cases, all servers that are storing tokens need a shared
+    backend. This means either that both point to the same database
+    server, or both point to a common memcached instance.
+  </para>
+</section>
+</section>

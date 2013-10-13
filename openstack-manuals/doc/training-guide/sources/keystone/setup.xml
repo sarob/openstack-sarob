@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Setting-up-a-Keystone-development-environment">
+<title>Setting up a Keystone development environment</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  This document describes getting the source from keystone's
+  <ulink url="http://github.com/openstack/keystone">GitHub
+  repository</ulink> for development purposes.
+</para>
+<para>
+  To install keystone from packaging, refer instead to Keystone's
+  <ulink url="http://docs.openstack.org/">User Documentation</ulink>.
+</para>
+</section>
+<section xml:id="prerequisites">
+  <title>Prerequisites</title>
+  <para>
+    This document assumes you are using:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Ubuntu 11.10, Fedora 15, or Mac OS X Lion
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="http://www.python.org/">Python 2.7</link>
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    And that you have the following tools available on your system:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <link xlink:href="http://git-scm.com/">git</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="http://pypi.python.org/pypi/setuptools">setuptools</link>
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <link xlink:href="http://pypi.python.org/pypi/pip">pip</link>
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    <emphasis role="strong">Reminder</emphasis>: If you're successfully
+    using a different platform, or a different version of the above,
+    please document your configuration here!
+  </para>
+</section>
+<section xml:id="getting-the-latest-code">
+  <title>Getting the latest code</title>
+  <para>
+    Make a clone of the code from our `Github repository`:
+  </para>
+  <programlisting>
+$ git clone https://github.com/openstack/keystone.git
+</programlisting>
+  <para>
+    When that is complete, you can:
+  </para>
+  <programlisting>
+$ cd keystone
+</programlisting>
+</section>
+<section xml:id="installing-dependencies">
+  <title>Installing dependencies</title>
+  <para>
+    Keystone maintains two lists of dependencies:
+  </para>
+  <programlisting>
+requirements.txt
+test-requirements.txt
+</programlisting>
+  <para>
+    The first is the list of dependencies needed for running keystone,
+    the second list includes dependencies used for active development
+    and testing of keystone itself.
+  </para>
+  <para>
+    These dependencies can be installed from
+    <link xlink:href="http://pypi.python.org/">PyPi</link> using the python
+    tool <link xlink:href="http://pypi.python.org/pypi/pip">pip</link>.
+  </para>
+  <para>
+    However, your system <emphasis>may</emphasis> need additional
+    dependencies that pip (and by extension, PyPi) cannot satisfy. These
+    dependencies should be installed prior to using pip, and the
+    installation method may vary depending on your platform.
+  </para>
+  <para>
+    Ubuntu 11.10:
+  </para>
+  <programlisting>
+$ sudo apt-get install python-dev libxml2-dev libxslt1-dev libsasl2-dev libsqlite3-dev libssl-dev libldap2-dev
+</programlisting>
+  <para>
+    Fedora 15:
+  </para>
+  <programlisting>
+$ sudo yum install python-sqlite2 python-lxml python-greenlet-devel python-ldap
+</programlisting>
+  <para>
+    Mac OS X Lion (requires
+    <link xlink:href="http://www.macports.org/">MacPorts</link>):
+  </para>
+  <programlisting>
+$ sudo port install py-ldap
+</programlisting>
+<section xml:id="pypi-packages-and-virtualenv">
+    <title>PyPi Packages and VirtualEnv</title>
+    <para>
+      We recommend establishing a virtualenv to run keystone within.
+      Virtualenv limits the python environment to just what you're
+      installing as depdendencies, useful to keep a clean environment
+      for working on Keystone. The tools directory in keystone has a
+      script already created to make this very simple:
+    </para>
+    <programlisting>
+$ python tools/install_venv.py
+</programlisting>
+    <para>
+      This will create a local virtual environment in the directory
+      <literal>.venv</literal>. Once created, you can activate this
+      virtualenv for your current shell using:
+    </para>
+    <programlisting>
+$ source .venv/bin/activate
+</programlisting>
+    <para>
+      The virtual environment can be disabled using the command:
+    </para>
+    <programlisting>
+$ deactivate
+</programlisting>
+    <para>
+      You can also use <literal>tools\with_venv.sh</literal> to prefix
+      commands so that they run within the virtual environment. For more
+      information on virtual environments, see
+      <link xlink:href="http://www.virtualenv.org/">virtualenv</link>.
+    </para>
+    <para>
+      If you want to run keystone outside of a virtualenv, you can
+      install the dependencies directly into your system from the
+      requires files:
+    </para>
+    <programlisting>
+# Install the dependencies for running keystone
+$ pip install -r requirements.txt
+
+# Install the dependencies for developing, testing, and running keystone
+$ pip install -r test-requirements.txt
+
+# Use python setup.py to link Keystone into python's site-packages
+$ python setup.py develop
+</programlisting>
+</section>
+</section>
+<section xml:id="verifying-keystone-is-set-up">
+  <title>Verifying Keystone is set up</title>
+  <para>
+    Once set up, either directly or within a virtualenv, you should be
+    able to invoke python and import the libraries. If you're using a
+    virtualenv, don't forget to activate it:
+  </para>
+  <programlisting>
+$ source .venv/bin/activate
+$ python
+</programlisting>
+  <para>
+    You should then be able to import keystone from your Python shell
+    without issue:
+  </para>
+  <programlisting>
+&gt;&gt;&gt; import keystone
+&gt;&gt;&gt;
+</programlisting>
+  <para>
+    If you can import keystone successfully, you should be ready to move
+    on to developing.
+  </para>
+</section>
+<section xml:id="troubleshooting">
+  <title>Troubleshooting</title>
+<section xml:id="eventlet-segfaults-on-redhat-fedora">
+    <title>Eventlet segfaults on RedHat / Fedora</title>
+    <para>
+      [<emphasis>If this is no longer an issue, please remove this
+      section, thanks!</emphasis>]
+    </para>
+    <para>
+      On some OSes, specifically Fedora 15, the current versions of
+      greenlet/eventlet segfault when running keystone. To fix this,
+      install the development versions of greenlet and eventlet:
+    </para>
+    <programlisting>
+$ pip uninstall greenlet eventlet
+$ cd &lt;appropriate working directory&gt;
+$ hg clone https://bitbucket.org/ambroff/greenlet
+$ cd greenlet
+$ sudo python setup.py install
+
+$ cd &lt;appropriate working directory&gt;
+$ hg clone https://bitbucket.org/which_linden/eventlet
+$ cd greenlet
+$ sudo python setup.py install
+</programlisting>
+</section>
+</section>
+</section>

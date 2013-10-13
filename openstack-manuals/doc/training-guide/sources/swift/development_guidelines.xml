@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Development-Guidelines">
+<title>Development Guidelines</title>
+<section xml:idelines">
+  <title>Coding Guidelines</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    For the most part we try to follow PEP 8 guidelines which can be
+    viewed here:
+    <ulink url="http://www.python.org/dev/peps/pep-0008/">http://www.python.org/dev/peps/pep-0008/</ulink>
+  </para>
+  <para>
+    There is a useful pep8 command line tool for checking files for pep8
+    compliance which can be installed with
+    <literal>easy_install pep8</literal>.
+  </para>
+</sect1>
+</section>
+<section xml:idelines">
+  <title>Testing Guidelines</title>
+  <para>
+    Swift has a comprehensive suite of tests that are run on all
+    submitted code, and it is recommended that developers execute the
+    tests themselves to catch regressions early. Developers are also
+    expected to keep the test suite up-to-date with any submitted code
+    changes.
+  </para>
+  <para>
+    Swift's suite of unit tests can be executed in an isolated
+    environment with Tox:
+    <link xlink:href="http://tox.testrun.org/">http://tox.testrun.org/</link>
+  </para>
+  <para>
+    To execute the unit tests:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        Install Tox:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            pip install tox
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        If you do not have python 2.6 installed (as in 12.04):
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Add export TOXENV=py27,pep8 to your ~/.bashrc
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            . ~/.bashrc
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+    <listitem>
+      <para>
+        Run Tox from the root of the swift repo:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            tox
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Remarks: If you installed using:
+        cd ~/swift; sudo python setup.py develop, you may need to do:
+        cd ~/swift; sudo chown -R swift:swift swift.egg-info prior to
+        running tox. If you ever encounter DistributionNotFound, try to
+        use tox --recreate or removing .tox directory to force tox to
+        recreate the dependency list
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Optionally, run only specific tox builds:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            tox -e pep8,py26
+          </para>
+        </listitem>
+      </itemizedlist>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xml:id="coding-style">
+  <title>Coding Style</title>
+  <para>
+    Swift use flake8 with the OpenStack
+    <link xlink:href="https://pypi.python.org/pypi/hacking">hacking</link>
+    module to enforce coding style.
+  </para>
+  <para>
+    Install flake8 and hacking with pip or by the packages of your
+    Operating System.
+  </para>
+  <para>
+    It is advised to integrate flake8+hacking with your editor to get it
+    automated and not get caught by Jenkins.
+  </para>
+  <para>
+    For example for Vim the
+    <link xlink:href="https://github.com/scrooloose/syntastic">syntastic</link>
+    plugin can do this for you.
+  </para>
+</section>
+<section xml:idelines">
+  <title>Documentation Guidelines</title>
+  <para>
+    The documentation in docstrings should follow the PEP 257
+    conventions (as mentioned in the PEP 8 guidelines).
+  </para>
+  <para>
+    More specifically:
+  </para>
+  <blockquote>
+    <orderedlist numeration="arabic">
+      <listitem>
+        <para>
+          Triple qutes should be used for all docstrings.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If the docstring is simple and fits on one line, then just use
+          one line.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          For docstrings that take multiple lines, there should be a
+          newline after the opening quotes, and before the closing
+          quotes.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sphinx is used to build documentation, so use the restructured
+          text markup to designate parameters, return values, etc.
+          Documentation on the sphinx specific markup can be found here:
+          <link xlink:href="http://sphinx.pocoo.org/markup/index.html">http://sphinx.pocoo.org/markup/index.html</link>
+        </para>
+      </listitem>
+    </orderedlist>
+  </blockquote>
+  <variablelist>
+    <varlistentry>
+      <term>
+        Installing Sphinx:
+      </term>
+      <listitem>
+        <orderedlist>
+          <listitem>
+            <para>
+              Install sphinx (On Ubuntu:
+              sudo apt-get install python-sphinx)
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              python setup.py build_sphinx
+            </para>
+          </listitem>
+        </orderedlist>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+</section>
+<section xml:id="license-and-copyright">
+  <title>License and Copyright</title>
+  <para>
+    You can have the following copyright and license statement at the
+    top of each source file. Copyright assignment is optional.
+  </para>
+  <para>
+    New files should contain the current year. Substantial updates can
+    have another year added, and date ranges are not needed.:
+  </para>
+  <programlisting>
+# Copyright (c) 2013 OpenStack Foundation.
+#
+# Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+</programlisting>
+</section>
+</section>

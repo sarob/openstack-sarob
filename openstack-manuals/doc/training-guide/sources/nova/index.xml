@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Developer-Guide">
+<title>Developer Guide</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  In this section you will find information on Nova's lower level
+  programming APIs.
+</para>
+</section>
+<section xml:id="programming-howtos-and-tutorials">
+  <title>Programming HowTos and Tutorials</title>
+  <para>
+  </para>
+</section>
+<section xml:id="background-concepts-for-nova">
+  <title>Background Concepts for Nova</title>
+  <para>
+  </para>
+</section>
+<section xml:id="other-resources">
+  <title>Other Resources</title>
+  <para>
+  </para>
+</section>
+<section xml:id="api-reference">
+  <title>API Reference</title>
+  <para>
+  </para>
+</section>
+<section xml:id="module-reference">
+  <title>Module Reference</title>
+  <para>
+  </para>
+</section>
+<section xml:id="indices-and-tables">
+  <title>Indices and tables</title>
+  <itemizedlist>
+    <listitem>
+      <para>
+        genindex
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        modindex
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        search
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

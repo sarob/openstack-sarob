@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="The-Database-Layer">
+<title>The Database Layer</title>
+<section xml:id="the-nova.db.api-module">
+  <title>The nova.db.api Module</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  </para>
+</sect1>
+</section>
+<section xml:id="the-sqlalchemy-driver">
+  <title>The Sqlalchemy Driver</title>
+<section xml:id="the-nova.db.sqlalchemy.api-module">
+    <title>The nova.db.sqlalchemy.api Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.db.sqlalchemy.models-module">
+    <title>The nova.db.sqlalchemy.models Module</title>
+    <para>
+    </para>
+</section>
+<section xml:id="the-nova.db.sqlalchemy.session-module">
+    <title>The nova.db.sqlalchemy.session Module</title>
+    <para>
+    </para>
+</section>
+</section>
+<section xml:id="tests">
+  <title>Tests</title>
+  <para>
+    Tests are lacking for the db api layer and for the sqlalchemy
+    driver. Failures in the drivers would be detected in other test
+    cases, though.
+  </para>
+</section>
+</section>

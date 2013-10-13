@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Nova-System-Architecture">
+<title>Nova System Architecture</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>  Nova is built on a shared-nothing, messaging-based architecture. All
+  of the major nova components can be run on multiple servers. This
+  means that most component to component communication must go via
+  message queue. In order to avoid blocking each component while waiting
+  for a response, we use deferred objects, with a callback that gets
+  triggered when a response is received.
+</para>
+<para>
+  Nova recently moved to using a sql-based central database that is
+  shared by all components in the system. The amount and depth of the
+  data fits into a sql database quite well. For small deployments this
+  seems like an optimal solution. For larger deployments, and especially
+  if security is a concern, nova will be moving towards multiple data
+  stores with some kind of aggregation system.
+</para>
+</section>
+<section xml:id="components">
+  <title>Components</title>
+  <para>
+    Below you will find a helpful explanation of the different
+    components.
+  </para>
+  <programlisting>
+/- ( LDAP )
+</programlisting>
+  <blockquote>
+    <variablelist>
+      <varlistentry>
+        <term>
+          [ Auth Manager ] --- | - ( DB )
+        </term>
+        <listitem>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </blockquote>
+  <blockquote>
+    <variablelist>
+      <varlistentry>
+        <term>
+          [ Web Dashboard ] -&gt; [ api ] -- &lt; AMQP &gt; ------ [
+          network ] - ( Flat/Vlan )
+        </term>
+        <listitem>
+          <para>
+                           \
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>
+          &lt; HTTP &gt; [ scheduler ] - [ compute ] - ( libvirt/xen )
+        </term>
+        <listitem>
+          <para>
+                                      |
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    <blockquote>
+      <para>
+        [ objectstore ] &lt; - retrieves images
+      </para>
+    </blockquote>
+  </blockquote>
+  <itemizedlist>
+    <listitem>
+      <para>
+        DB: sql database for data storage. Used by all components (LINKS
+        NOT SHOWN)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Web Dashboard: potential external component that talks to the
+        api
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        api: component that receives http requests, converts commands
+        and communicates with other components via the queue or http (in
+        the case of objectstore)
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Auth Manager: component responsible for users/projects/and
+        roles. Can backend to DB or LDAP. This is not a separate binary,
+        but rather a python class that is used by most components in the
+        system.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        objectstore: http server that replicates s3 api and allows
+        storage and retrieval of images
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        scheduler: decides which host gets each vm
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        network: manages ip forwarding, bridges, and vlans
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        compute: manages communication with hypervisor and virtual
+        machines.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+</section>

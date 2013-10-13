@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <section xmlns="http://docbook.org/ns/docbook"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.0"
+  xml:id="Virtual-Machine-States-and-Transitions">
+<title>Virtual Machine States and Transitions</title>
+<section xml:id="preconditions-for-commands">
+  <title>Preconditions for commands</title>
+<section xml:id="page-abstract">
+<title>Page Abstract</title>
+<para>    The following diagrams show the required virtual machine (VM) states
+    and task states for various commands issued by the user:
+  </para>
+  <para>
+    <inlinemediaobject>
+      <imageobject>
+        <imagedata fileref="/images/PowerStates1.png" />
+      </imageobject>
+    </inlinemediaobject>
+  </para>
+  <para>
+    <inlinemediaobject>
+      <imageobject>
+        <imagedata fileref="/images/PowerStates2.png" />
+      </imageobject>
+    </inlinemediaobject>
+  </para>
+</sect1>
+</section>
+<section xml:id="create-instance-states">
+  <title>Create instance states</title>
+  <para>
+    The following diagram shows the sequence of VM states, task states,
+    and power states when a new VM instance is created.
+  </para>
+  <para>
+    <inlinemediaobject>
+      <imageobject>
+        <imagedata fileref="/images/run_instance_walkthrough.png" />
+      </imageobject>
+    </inlinemediaobject>
+  </para>
+</section>
+</section>
